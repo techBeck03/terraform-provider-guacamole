@@ -44,10 +44,12 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"guacamole_user": guacamoleUser(),
+			"guacamole_user":       guacamoleUser(),
+			"guacamole_user_group": guacamoleUserGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"guacamole_user": dataSourceUser(),
+			"guacamole_user":       dataSourceUser(),
+			"guacamole_user_group": dataSourceUserGroup(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
