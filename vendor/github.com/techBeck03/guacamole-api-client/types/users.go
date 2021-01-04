@@ -12,6 +12,7 @@ type GuacUser struct {
 type GuacUserAttributes struct {
 	GuacOrganizationalRole string `json:"guac-organizational-role,omitempty"`
 	GuacFullName           string `json:"guac-full-name,omitempty"`
+	Email                  string `json:"guac-email-address,omitempty"`
 	Expired                string `json:"expired,omitempty"`
 	Timezone               string `json:"timezone,omitempty"`
 	AccessWindowStart      string `json:"access-window-start,omitempty"`

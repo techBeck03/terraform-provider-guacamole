@@ -229,8 +229,6 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/techBeck03/guacamole-api-client v1.2.0 h1:/4jmlHnb/RKhmvUUxjYhv5Sl8XaNSx++yKZOaDeAkl0=
-github.com/techBeck03/guacamole-api-client v1.2.0/go.mod h1:9pFTSahbIzCi7YJpTIB859rwYcKfG6f8GknBGwjZOtg=
 github.com/techBeck03/guacamole-api-client v1.2.1 h1:Rv9+PAqUa0peYLw1llo2YNI9eFFmlYew+ntqGxz1nWk=
 github.com/techBeck03/guacamole-api-client v1.2.1/go.mod h1:9pFTSahbIzCi7YJpTIB859rwYcKfG6f8GknBGwjZOtg=
 github.com/ulikunitz/xz v0.5.5/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=

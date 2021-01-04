@@ -3,8 +3,6 @@ package guacamole
 import (
 	"context"
 	"fmt"
-	"log"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,6 +38,11 @@ func dataSourceUser() *schema.Resource {
 						"full_name": {
 							Type:        schema.TypeString,
 							Description: "Full name of user",
+							Optional:    true,
+						},
+						"email": {
+							Type:        schema.TypeString,
+							Description: "Email of user",
 							Optional:    true,
 						},
 						"expired": {
@@ -91,7 +94,6 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, m interface
 	var diags diag.Diagnostics
 
 	username := d.Get("username").(string)
-	log.Printf("[DEBUG] Looking for guacamole user: %s\n", username)
 
 	user, err := client.ReadUser(username)
 
@@ -105,27 +107,11 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diags
 	}
 
-	d.Set("username", user.Username)
-	d.Set("last_active", strconv.Itoa(user.LastActive))
+	err = convertGuacUserToResourceData(d, &user)
 
-	attributes := map[string]interface{}{
-		"organizational_role": user.Attributes.GuacOrganizationalRole,
-		"full_name":           user.Attributes.GuacFullName,
-		"expired":             stringToBool(user.Attributes.Expired),
-		"timezone":            user.Attributes.Timezone,
-		"access_window_start": user.Attributes.AccessWindowStart,
-		"access_window_end":   user.Attributes.AccessWindowEnd,
-		"disabled":            stringToBool(user.Attributes.Disabled),
-		"valid_from":          user.Attributes.ValidFrom,
-		"valid_until":         user.Attributes.ValidUntil,
+	if err != nil {
+		return diag.FromErr(err)
 	}
-
-	var attributeList []map[string]interface{}
-
-	attributeList = append(attributeList, attributes)
-
-	d.Set("attributes", attributeList)
-	d.SetId(user.Username)
 
 	return diags
 }

@@ -46,6 +46,11 @@ func guacamoleUser() *schema.Resource {
 							Description: "Full name of user",
 							Optional:    true,
 						},
+						"email": {
+							Type:        schema.TypeString,
+							Description: "Email of user",
+							Optional:    true,
+						},
 						"expired": {
 							Type:        schema.TypeBool,
 							Description: "Whether the user is expired",
@@ -131,37 +136,17 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diags
 	}
 
-	d.Set("username", user.Username)
-	d.Set("last_active", strconv.Itoa(user.LastActive))
+	err = convertGuacUserToResourceData(d, &user)
 
-	attributes := map[string]interface{}{
-		"organizational_role": user.Attributes.GuacOrganizationalRole,
-		"full_name":           user.Attributes.GuacFullName,
-		"expired":             stringToBool(user.Attributes.Expired),
-		"timezone":            user.Attributes.Timezone,
-		"access_window_start": user.Attributes.AccessWindowStart,
-		"access_window_end":   user.Attributes.AccessWindowEnd,
-		"disabled":            stringToBool(user.Attributes.Disabled),
-		"valid_from":          user.Attributes.ValidFrom,
-		"valid_until":         user.Attributes.ValidUntil,
+	if err != nil {
+		return diag.FromErr(err)
 	}
-
-	var attributeList []map[string]interface{}
-
-	attributeList = append(attributeList, attributes)
-
-	d.Set("attributes", attributeList)
 
 	return diags
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*guac.Client)
-
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	var user types.GuacUser
 
 	if d.HasChange("username") || d.HasChange("last_active") || d.HasChange("attributes") {
 		user, err := convertResourceDataToGuacUser(d)
@@ -175,10 +160,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		}
 	}
 
-	d.SetId(user.Username)
-	resourceUserRead(ctx, d, m)
-
-	return diags
+	return resourceUserRead(ctx, d, m)
 }
 
 func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -218,6 +200,7 @@ func convertResourceDataToGuacUser(d *schema.ResourceData) (types.GuacUser, erro
 		user.Attributes = types.GuacUserAttributes{
 			GuacOrganizationalRole: attributes["organizational_role"].(string),
 			GuacFullName:           attributes["full_name"].(string),
+			Email:                  attributes["email"].(string),
 			Expired:                boolToString(attributes["expired"].(bool)),
 			Timezone:               attributes["timezone"].(string),
 			AccessWindowStart:      attributes["access_window_start"].(string),
@@ -229,4 +212,30 @@ func convertResourceDataToGuacUser(d *schema.ResourceData) (types.GuacUser, erro
 	}
 
 	return user, nil
+}
+
+func convertGuacUserToResourceData(d *schema.ResourceData, user *types.GuacUser) error {
+	d.Set("username", user.Username)
+	d.Set("last_active", strconv.Itoa(user.LastActive))
+
+	attributes := map[string]interface{}{
+		"organizational_role": user.Attributes.GuacOrganizationalRole,
+		"full_name":           user.Attributes.GuacFullName,
+		"email":               user.Attributes.Email,
+		"expired":             stringToBool(user.Attributes.Expired),
+		"timezone":            user.Attributes.Timezone,
+		"access_window_start": user.Attributes.AccessWindowStart,
+		"access_window_end":   user.Attributes.AccessWindowEnd,
+		"disabled":            stringToBool(user.Attributes.Disabled),
+		"valid_from":          user.Attributes.ValidFrom,
+		"valid_until":         user.Attributes.ValidUntil,
+	}
+
+	var attributeList []map[string]interface{}
+
+	attributeList = append(attributeList, attributes)
+
+	d.Set("attributes", attributeList)
+
+	return nil
 }
