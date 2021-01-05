@@ -33,6 +33,42 @@ func dataSourceUserGroup() *schema.Resource {
 					},
 				},
 			},
+			"parent_groups": {
+				Type:        schema.TypeList,
+				Description: "Member groups of a guacamole user group",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"member_groups": {
+				Type:        schema.TypeList,
+				Description: "Member groups of a guacamole user group",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"member_users": {
+				Type:        schema.TypeList,
+				Description: "Member users of a guacamole user group",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"system_permissions": {
+				Type:        schema.TypeList,
+				Description: "Member users of a guacamole user group",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -62,6 +98,40 @@ func dataSourceUserGroupRead(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	parentGroups, err := client.GetUserGroupParentGroups(identifier)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.Set("parent_groups", parentGroups)
+
+	memberGroups, err := client.GetUserGroupMemberGroups(identifier)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.Set("member_groups", memberGroups)
+
+	members, err := client.GetUserGroupUsers(identifier)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.Set("member_users", members)
+
+	permissions, err := client.GetUserGroupPermissions(identifier)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.Set("system_permissions", permissions.SystemPermissions)
+
+	d.SetId(identifier)
 
 	return diags
 }

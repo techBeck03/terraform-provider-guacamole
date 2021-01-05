@@ -83,6 +83,15 @@ func dataSourceUser() *schema.Resource {
 					},
 				},
 			},
+			"group_membership": {
+				Type:        schema.TypeList,
+				Description: "Groups the user is assigned to",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -107,11 +116,21 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diags
 	}
 
-	err = convertGuacUserToResourceData(d, &user)
+	groups, err := client.GetUserGroupMembership(username)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	err = convertGuacUserToResourceData(d, &user)
+
+	d.Set("group_membership", groups)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(username)
 
 	return diags
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -89,6 +90,24 @@ func guacamoleUser() *schema.Resource {
 					},
 				},
 			},
+			"group_membership": {
+				Type:        schema.TypeList,
+				Description: "Groups this user is a member of",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"system_permissions": {
+				Type:        schema.TypeList,
+				Description: "System permissions assigned to user",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -103,6 +122,22 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	groupMembership := d.Get("group_membership").([]string)
+	if len(groupMembership) > 0 {
+		check := validateGroups(client, groupMembership)
+		if check.HasError() {
+			return check
+		}
+		var permissionItems []types.GuacPermissionItem
+		for _, group := range groupMembership {
+			permissionItems = append(permissionItems, client.NewAddGroupMemberPermission(group))
+		}
+		err = client.SetUserGroupMembership(user.Username, &permissionItems)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	err = client.CreateUser(&user)
@@ -238,4 +273,35 @@ func convertGuacUserToResourceData(d *schema.ResourceData, user *types.GuacUser)
 	d.Set("attributes", attributeList)
 
 	return nil
+}
+
+func validateGroups(client *guac.Client, groups []string) diag.Diagnostics {
+	var diags diag.Diagnostics
+	var invalidUserGroups []string
+
+	userGroups, err := client.ListUserGroups()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	for _, group := range groups {
+		matchFlag := false
+		for _, g := range userGroups {
+			if group == g.Identifier {
+				matchFlag = true
+				break
+			}
+		}
+		if !matchFlag {
+			invalidUserGroups = append(invalidUserGroups, group)
+		}
+	}
+	if len(invalidUserGroups) > 0 {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Invalid user group(s) supplied"),
+			Detail:   fmt.Sprintf("The following groups are invalid for group_membership: %s", strings.Join(invalidUserGroups[:], ", ")),
+		})
+		return diags
+	}
+	return diags
 }

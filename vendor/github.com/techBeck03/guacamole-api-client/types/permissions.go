@@ -17,3 +17,32 @@ type GuacPermissionData struct {
 	SystemPermissions           []string            `json:"systemPermissions"`
 	ActiveConnectionPermissions map[string][]string `json:"activeConnectionPermissions"`
 }
+
+// SystemPermissions defines a class type for system permissions
+type SystemPermissions struct {
+}
+
+// Administer constant value option
+func (SystemPermissions) Administer() string {
+	return "ADMINISTER"
+}
+
+// CreateUser constant value option
+func (SystemPermissions) CreateUser() string {
+	return "CREATE_USER"
+}
+
+// CreateConnection constant value option
+func (SystemPermissions) CreateConnection() string {
+	return "CREATE_CONNECTION"
+}
+
+// CreateConnectionGroup constant value option
+func (SystemPermissions) CreateConnectionGroup() string {
+	return "CREATE_CONNECTION_GROUP"
+}
+
+// CreateSharingProfile constant value option
+func (SystemPermissions) CreateSharingProfile() string {
+	return "CREATE_SHARING_PROFILE"
+}

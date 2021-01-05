@@ -38,6 +38,24 @@ func guacamoleUserGroup() *schema.Resource {
 					},
 				},
 			},
+			"group_membership": {
+				Type:        schema.TypeList,
+				Description: "Groups this user group is a member of",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"system_permissions": {
+				Type:        schema.TypeList,
+				Description: "System permissions assigned to user group",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
