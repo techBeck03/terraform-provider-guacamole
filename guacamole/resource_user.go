@@ -3,7 +3,6 @@ package guacamole
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -92,7 +91,7 @@ func guacamoleUser() *schema.Resource {
 				},
 			},
 			"group_membership": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Groups this user is a member of",
 				Optional:    true,
 				Elem: &schema.Schema{
@@ -100,7 +99,7 @@ func guacamoleUser() *schema.Resource {
 				},
 			},
 			"system_permissions": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "System permissions assigned to user",
 				Optional:    true,
 				Elem: &schema.Schema{
@@ -112,6 +111,7 @@ func guacamoleUser() *schema.Resource {
 }
 
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
 	client := m.(*guac.Client)
 
 	user, err := convertResourceDataToGuacUser(d)
@@ -126,18 +126,21 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
+	groupMembershipSet, ok := d.GetOk("group_membership")
 	var groupMembership []string
-	for _, group := range d.Get("group_membership").([]interface{}) {
+	for _, group := range groupMembershipSet.(*schema.Set).List() {
 		groupMembership = append(groupMembership, group.(string))
 	}
-	if len(groupMembership) > 0 {
+	if ok && len(groupMembership) > 0 {
 		check := validateGroups(client, groupMembership)
 		if check.HasError() {
-			return check
+			diags = append(diags, check...)
+			goto Cleanup
 		}
 		check = checkForDuplicates(groupMembership)
 		if check.HasError() {
-			return check
+			diags = append(diags, check...)
+			goto Cleanup
 		}
 		var permissionItems []types.GuacPermissionItem
 		for _, group := range groupMembership {
@@ -145,41 +148,54 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		}
 		err = client.SetUserGroupMembership(user.Username, &permissionItems)
 		if err != nil {
-			return diag.FromErr(err)
+			diags = append(diags, diag.FromErr(err)...)
+			goto Cleanup
 		}
 	}
 
-	var systemPermissions []string
-	for _, group := range d.Get("system_permissions").([]interface{}) {
-		systemPermissions = append(systemPermissions, group.(string))
-	}
-	if len(systemPermissions) > 0 {
-		check := complexStringInSlice(types.SystemPermissions{}.ValidChoices(), systemPermissions)
-		if check.HasError() {
-			return check
+	if !diags.HasError() {
+		systemPermissionsSet, ok := d.GetOk("system_permissions")
+		var systemPermissions []string
+		for _, group := range systemPermissionsSet.(*schema.Set).List() {
+			systemPermissions = append(systemPermissions, group.(string))
 		}
-		check = checkForDuplicates(systemPermissions)
-		if check.HasError() {
-			return check
-		}
-		var permissionItems []types.GuacPermissionItem
-		for _, permission := range systemPermissions {
-			permissionItems = append(permissionItems, client.NewAddSystemPermission(permission))
-		}
-		err = client.SetUserPermissions(user.Username, &permissionItems)
-		if err != nil {
-			return diag.FromErr(err)
+		if ok && len(systemPermissions) > 0 {
+			check := stringInSlice(types.SystemPermissions{}.ValidChoices(), systemPermissions)
+			if check.HasError() {
+				diags = append(diags, check...)
+				goto Cleanup
+			}
+			check = checkForDuplicates(systemPermissions)
+			if check.HasError() {
+				diags = append(diags, check...)
+				goto Cleanup
+			}
+			var permissionItems []types.GuacPermissionItem
+			for _, permission := range systemPermissions {
+				permissionItems = append(permissionItems, client.NewAddSystemPermission(permission))
+			}
+			err = client.SetUserPermissions(user.Username, &permissionItems)
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+				goto Cleanup
+			}
 		}
 	}
 
 	d.SetId(user.Username)
 	return resourceUserRead(ctx, d, m)
+Cleanup:
+	d.SetId(user.Username)
+	check := resourceUserDelete(ctx, d, m)
+	if check.HasError() {
+		diags = append(diags, check...)
+	}
+	return diags
 }
 
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*guac.Client)
 
-	log.Printf("[DEBUG]------(INFO)------ Inside resource read\n")
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
@@ -209,12 +225,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(err)
 	}
 
-	_, new := d.GetChange("group_membership")
-	var changes []string
-	for _, group := range new.([]interface{}) {
-		changes = append(changes, group.(string))
-	}
-	d.Set("group_membership", sortSliceBySlice(changes, groups))
+	d.Set("group_membership", groups) //sortSliceBySlice(changes, groups))
 
 	// Read system permissions
 	permissions, err := client.GetUserPermissions(userID)
@@ -223,12 +234,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(err)
 	}
 
-	_, new = d.GetChange("system_permissions")
-	changes = []string{}
-	for _, permission := range new.([]interface{}) {
-		changes = append(changes, permission.(string))
-	}
-	d.Set("system_permissions", sortSliceBySlice(changes, permissions.SystemPermissions))
+	d.Set("system_permissions", permissions.SystemPermissions) //sortSliceBySlice(changes, permissions.SystemPermissions))
 
 	return diags
 }
@@ -252,11 +258,11 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		var permissionItems []types.GuacPermissionItem
 		var oldGroups, newGroups []string
 		old, new := d.GetChange("group_membership")
-		for _, group := range old.([]interface{}) {
+		for _, group := range old.(*schema.Set).List() {
 			oldGroups = append(oldGroups, group.(string))
 		}
 
-		for _, group := range new.([]interface{}) {
+		for _, group := range new.(*schema.Set).List() {
 			newGroups = append(newGroups, group.(string))
 		}
 
@@ -294,11 +300,11 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		old, new := d.GetChange("system_permissions")
 		var oldPermissions, newPermissions []string
 
-		for _, permission := range old.([]interface{}) {
+		for _, permission := range old.(*schema.Set).List() {
 			oldPermissions = append(oldPermissions, permission.(string))
 		}
 
-		for _, permission := range new.([]interface{}) {
+		for _, permission := range new.(*schema.Set).List() {
 			newPermissions = append(newPermissions, permission.(string))
 		}
 
@@ -311,11 +317,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 
 		addPermissions := sliceDiff(newPermissions, oldPermissions, false)
 		if len(addPermissions) > 0 {
-			check := complexStringInSlice(types.SystemPermissions{}.ValidChoices(), addPermissions)
-			if check.HasError() {
-				return check
-			}
-			check = checkForDuplicates(addPermissions)
+			check := stringInSlice(types.SystemPermissions{}.ValidChoices(), addPermissions)
 			if check.HasError() {
 				return check
 			}

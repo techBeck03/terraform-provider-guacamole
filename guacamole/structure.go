@@ -62,7 +62,7 @@ func sliceDiff(slice1 []string, slice2 []string, bidirectional bool) []string {
 	return diff
 }
 
-func complexStringInSlice(valid []string, test []string) diag.Diagnostics {
+func stringInSlice(valid []string, test []string) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	for _, t := range test {
