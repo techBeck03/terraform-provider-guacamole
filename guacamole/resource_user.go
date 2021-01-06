@@ -3,6 +3,7 @@ package guacamole
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -94,7 +95,6 @@ func guacamoleUser() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "Groups this user is a member of",
 				Optional:    true,
-				MaxItems:    1,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -103,7 +103,6 @@ func guacamoleUser() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "System permissions assigned to user",
 				Optional:    true,
-				MaxItems:    1,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -115,18 +114,28 @@ func guacamoleUser() *schema.Resource {
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*guac.Client)
 
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
 	user, err := convertResourceDataToGuacUser(d)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	groupMembership := d.Get("group_membership").([]string)
+	err = client.CreateUser(&user)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var groupMembership []string
+	for _, group := range d.Get("group_membership").([]interface{}) {
+		groupMembership = append(groupMembership, group.(string))
+	}
 	if len(groupMembership) > 0 {
 		check := validateGroups(client, groupMembership)
+		if check.HasError() {
+			return check
+		}
+		check = checkForDuplicates(groupMembership)
 		if check.HasError() {
 			return check
 		}
@@ -140,21 +149,37 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		}
 	}
 
-	err = client.CreateUser(&user)
-
-	if err != nil {
-		return diag.FromErr(err)
+	var systemPermissions []string
+	for _, group := range d.Get("system_permissions").([]interface{}) {
+		systemPermissions = append(systemPermissions, group.(string))
+	}
+	if len(systemPermissions) > 0 {
+		check := complexStringInSlice(types.SystemPermissions{}.ValidChoices(), systemPermissions)
+		if check.HasError() {
+			return check
+		}
+		check = checkForDuplicates(systemPermissions)
+		if check.HasError() {
+			return check
+		}
+		var permissionItems []types.GuacPermissionItem
+		for _, permission := range systemPermissions {
+			permissionItems = append(permissionItems, client.NewAddSystemPermission(permission))
+		}
+		err = client.SetUserPermissions(user.Username, &permissionItems)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	d.SetId(user.Username)
-	resourceUserRead(ctx, d, m)
-
-	return diags
+	return resourceUserRead(ctx, d, m)
 }
 
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*guac.Client)
 
+	log.Printf("[DEBUG]------(INFO)------ Inside resource read\n")
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
@@ -177,13 +202,41 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(err)
 	}
 
+	// Read group membership
+	groups, err := client.GetUserGroupMembership(userID)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	_, new := d.GetChange("group_membership")
+	var changes []string
+	for _, group := range new.([]interface{}) {
+		changes = append(changes, group.(string))
+	}
+	d.Set("group_membership", sortSliceBySlice(changes, groups))
+
+	// Read system permissions
+	permissions, err := client.GetUserPermissions(userID)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	_, new = d.GetChange("system_permissions")
+	changes = []string{}
+	for _, permission := range new.([]interface{}) {
+		changes = append(changes, permission.(string))
+	}
+	d.Set("system_permissions", sortSliceBySlice(changes, permissions.SystemPermissions))
+
 	return diags
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*guac.Client)
 
-	if d.HasChange("username") || d.HasChange("last_active") || d.HasChange("attributes") {
+	if d.HasChanges("username", "last_active", "attributes") {
 		user, err := convertResourceDataToGuacUser(d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -192,6 +245,89 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 
 		if err != nil {
 			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("group_membership") {
+		var permissionItems []types.GuacPermissionItem
+		var oldGroups, newGroups []string
+		old, new := d.GetChange("group_membership")
+		for _, group := range old.([]interface{}) {
+			oldGroups = append(oldGroups, group.(string))
+		}
+
+		for _, group := range new.([]interface{}) {
+			newGroups = append(newGroups, group.(string))
+		}
+
+		removeGroups := sliceDiff(oldGroups, newGroups, false)
+		if len(removeGroups) > 0 {
+			for _, group := range removeGroups {
+				permissionItems = append(permissionItems, client.NewRemoveGroupMemberPermission(group))
+			}
+		}
+
+		addGroups := sliceDiff(newGroups, oldGroups, false)
+		if len(addGroups) > 0 {
+			check := validateGroups(client, addGroups)
+			if check.HasError() {
+				return check
+			}
+			check = checkForDuplicates(addGroups)
+			if check.HasError() {
+				return check
+			}
+			for _, group := range addGroups {
+				permissionItems = append(permissionItems, client.NewAddGroupMemberPermission(group))
+			}
+		}
+		if len(permissionItems) > 0 {
+			err := client.SetUserGroupMembership(d.Id(), &permissionItems)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
+	if d.HasChange("system_permissions") {
+		var permissionItems []types.GuacPermissionItem
+		old, new := d.GetChange("system_permissions")
+		var oldPermissions, newPermissions []string
+
+		for _, permission := range old.([]interface{}) {
+			oldPermissions = append(oldPermissions, permission.(string))
+		}
+
+		for _, permission := range new.([]interface{}) {
+			newPermissions = append(newPermissions, permission.(string))
+		}
+
+		removePermissions := sliceDiff(oldPermissions, newPermissions, false)
+		if len(removePermissions) > 0 {
+			for _, permission := range removePermissions {
+				permissionItems = append(permissionItems, client.NewRemoveSystemPermission(permission))
+			}
+		}
+
+		addPermissions := sliceDiff(newPermissions, oldPermissions, false)
+		if len(addPermissions) > 0 {
+			check := complexStringInSlice(types.SystemPermissions{}.ValidChoices(), addPermissions)
+			if check.HasError() {
+				return check
+			}
+			check = checkForDuplicates(addPermissions)
+			if check.HasError() {
+				return check
+			}
+			for _, permission := range addPermissions {
+				permissionItems = append(permissionItems, client.NewAddSystemPermission(permission))
+			}
+		}
+		if len(permissionItems) > 0 {
+			err := client.SetUserPermissions(d.Id(), &permissionItems)
+			if err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 

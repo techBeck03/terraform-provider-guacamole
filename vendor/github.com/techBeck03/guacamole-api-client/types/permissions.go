@@ -46,3 +46,14 @@ func (SystemPermissions) CreateConnectionGroup() string {
 func (SystemPermissions) CreateSharingProfile() string {
 	return "CREATE_SHARING_PROFILE"
 }
+
+// ValidChoices returns an array of valid system permission choices
+func (SystemPermissions) ValidChoices() []string {
+	return []string{
+		"ADMINISTER",
+		"CREATE_USER",
+		"CREATE_CONNECTION",
+		"CREATE_CONNECTION_GROUP",
+		"CREATE_SHARING_PROFILE",
+	}
+}
