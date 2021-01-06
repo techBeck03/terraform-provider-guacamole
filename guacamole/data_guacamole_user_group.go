@@ -29,12 +29,13 @@ func dataSourceUserGroup() *schema.Resource {
 							Type:        schema.TypeBool,
 							Description: "Whether group is disabled",
 							Optional:    true,
+							Default:     false,
 						},
 					},
 				},
 			},
 			"parent_groups": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Member groups of a guacamole user group",
 				Optional:    true,
 				MaxItems:    1,
@@ -43,7 +44,7 @@ func dataSourceUserGroup() *schema.Resource {
 				},
 			},
 			"member_groups": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Member groups of a guacamole user group",
 				Optional:    true,
 				MaxItems:    1,
@@ -52,7 +53,7 @@ func dataSourceUserGroup() *schema.Resource {
 				},
 			},
 			"member_users": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Member users of a guacamole user group",
 				Optional:    true,
 				MaxItems:    1,
@@ -61,7 +62,7 @@ func dataSourceUserGroup() *schema.Resource {
 				},
 			},
 			"system_permissions": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Member users of a guacamole user group",
 				Optional:    true,
 				MaxItems:    1,
@@ -86,7 +87,7 @@ func dataSourceUserGroupRead(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  fmt.Sprintf("Error reading guacamole user: %s", identifier),
+			Summary:  fmt.Sprintf("Error reading guacamole user group: %s", identifier),
 			Detail:   err.Error(),
 		})
 

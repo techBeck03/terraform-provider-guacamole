@@ -41,51 +41,61 @@ func guacamoleUser() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "Organizational role of user",
 							Optional:    true,
+							Default:     "",
 						},
 						"full_name": {
 							Type:        schema.TypeString,
 							Description: "Full name of user",
 							Optional:    true,
+							Default:     "",
 						},
 						"email": {
 							Type:        schema.TypeString,
 							Description: "Email of user",
 							Optional:    true,
+							Default:     "",
 						},
 						"expired": {
 							Type:        schema.TypeBool,
 							Description: "Whether the user is expired",
 							Optional:    true,
+							Default:     false,
 						},
 						"timezone": {
 							Type:        schema.TypeString,
 							Description: "Timezone of user",
 							Optional:    true,
+							Default:     "",
 						},
 						"access_window_start": {
 							Type:        schema.TypeString,
 							Description: "Access window start time for user",
 							Optional:    true,
+							Default:     "",
 						},
 						"access_window_end": {
 							Type:        schema.TypeString,
 							Description: "Access window end time for user",
 							Optional:    true,
+							Default:     "",
 						},
 						"disabled": {
 							Type:        schema.TypeBool,
 							Description: "Whether account is disabled",
 							Optional:    true,
+							Default:     false,
 						},
 						"valid_from": {
 							Type:        schema.TypeString,
 							Description: "Start date for when user is valid",
 							Optional:    true,
+							Default:     "",
 						},
 						"valid_until": {
 							Type:        schema.TypeString,
 							Description: "End date for when user is valid",
 							Optional:    true,
+							Default:     "",
 						},
 					},
 				},
@@ -137,11 +147,6 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 			diags = append(diags, check...)
 			goto Cleanup
 		}
-		check = checkForDuplicates(groupMembership)
-		if check.HasError() {
-			diags = append(diags, check...)
-			goto Cleanup
-		}
 		var permissionItems []types.GuacPermissionItem
 		for _, group := range groupMembership {
 			permissionItems = append(permissionItems, client.NewAddGroupMemberPermission(group))
@@ -161,11 +166,6 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		}
 		if ok && len(systemPermissions) > 0 {
 			check := stringInSlice(types.SystemPermissions{}.ValidChoices(), systemPermissions)
-			if check.HasError() {
-				diags = append(diags, check...)
-				goto Cleanup
-			}
-			check = checkForDuplicates(systemPermissions)
 			if check.HasError() {
 				diags = append(diags, check...)
 				goto Cleanup
@@ -225,7 +225,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(err)
 	}
 
-	d.Set("group_membership", groups) //sortSliceBySlice(changes, groups))
+	d.Set("group_membership", groups)
 
 	// Read system permissions
 	permissions, err := client.GetUserPermissions(userID)
@@ -234,7 +234,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(err)
 	}
 
-	d.Set("system_permissions", permissions.SystemPermissions) //sortSliceBySlice(changes, permissions.SystemPermissions))
+	d.Set("system_permissions", permissions.SystemPermissions)
 
 	return diags
 }
