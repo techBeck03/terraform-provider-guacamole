@@ -358,13 +358,6 @@ func convertResourceDataToGuacUser(d *schema.ResourceData) (types.GuacUser, erro
 	var user types.GuacUser
 
 	user.Username = d.Get("username").(string)
-	if d.Get("last_active").(string) != "" {
-		lastActive, err := strconv.Atoi(d.Get("last_active").(string))
-		if err != nil {
-			return user, err
-		}
-		user.LastActive = lastActive
-	}
 
 	attributeList := d.Get("attributes").([]interface{})
 

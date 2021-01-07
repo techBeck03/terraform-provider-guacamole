@@ -17,7 +17,6 @@ func dataSourceUser() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Username of guacamole user",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"last_active": {
 				Type:        schema.TypeString,
@@ -27,69 +26,58 @@ func dataSourceUser() *schema.Resource {
 			"attributes": {
 				Type:        schema.TypeList,
 				Description: "Attributes of guacamole user",
-				Optional:    true,
-				MaxItems:    1,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"organizational_role": {
 							Type:        schema.TypeString,
 							Description: "Organizational role of user",
-							Optional:    true,
-							Default:     "",
+							Computed:    true,
 						},
 						"full_name": {
 							Type:        schema.TypeString,
 							Description: "Full name of user",
-							Optional:    true,
-							Default:     "",
+							Computed:    true,
 						},
 						"email": {
 							Type:        schema.TypeString,
 							Description: "Email of user",
-							Optional:    true,
-							Default:     "",
+							Computed:    true,
 						},
 						"expired": {
 							Type:        schema.TypeBool,
 							Description: "Whether the user is expired",
-							Optional:    true,
-							Default:     false,
+							Computed:    true,
 						},
 						"timezone": {
 							Type:        schema.TypeString,
 							Description: "Timezone of user",
-							Optional:    true,
-							Default:     "",
+							Computed:    true,
 						},
 						"access_window_start": {
 							Type:        schema.TypeString,
 							Description: "Access window start time for user",
-							Optional:    true,
-							Default:     "",
+							Computed:    true,
 						},
 						"access_window_end": {
 							Type:        schema.TypeString,
 							Description: "Access window end time for user",
-							Optional:    true,
-							Default:     "",
+							Computed:    true,
 						},
 						"disabled": {
 							Type:        schema.TypeBool,
 							Description: "Whether account is disabled",
-							Optional:    true,
-							Default:     false,
+							Computed:    true,
 						},
 						"valid_from": {
 							Type:        schema.TypeString,
 							Description: "Start date for when user is valid",
-							Optional:    true,
-							Default:     "",
+							Computed:    true,
 						},
 						"valid_until": {
 							Type:        schema.TypeString,
 							Description: "End date for when user is valid",
-							Optional:    true,
-							Default:     "",
+							Computed:    true,
 						},
 					},
 				},
@@ -97,7 +85,7 @@ func dataSourceUser() *schema.Resource {
 			"group_membership": {
 				Type:        schema.TypeSet,
 				Description: "Groups this user is a member of",
-				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -105,7 +93,7 @@ func dataSourceUser() *schema.Resource {
 			"system_permissions": {
 				Type:        schema.TypeSet,
 				Description: "System permissions assigned to user",
-				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},

@@ -44,19 +44,21 @@ func (c *Client) ReadConnection(identifier string) (types.GuacConnection, error)
 		return ret, err
 	}
 
-	// Get connection parameters
-	request, err = c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/parameters", c.baseURL, connectionsBasePath, identifier), nil)
+	if ret.Identifier != "" {
+		// Get connection parameters
+		request, err = c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/parameters", c.baseURL, connectionsBasePath, identifier), nil)
 
-	if err != nil {
-		return ret, err
+		if err != nil {
+			return ret, err
+		}
+
+		err = c.Call(request, &retParams)
+		if err != nil {
+			return ret, err
+		}
 	}
 
-	err = c.Call(request, &retParams)
-	if err != nil {
-		return ret, err
-	}
-
-	ret.Properties = retParams
+	ret.Parameters = retParams
 
 	return ret, nil
 }
@@ -118,7 +120,7 @@ func (c *Client) ReadConnectionByPath(path string) (types.GuacConnection, error)
 		return ret, err
 	}
 
-	ret.Properties = retParams
+	ret.Parameters = retParams
 
 	return ret, nil
 }

@@ -2,9 +2,7 @@ package guacamole
 
 import (
 	"context"
-	"fmt"
 
-	multierror "github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	guac "github.com/techBeck03/guacamole-api-client"
@@ -44,12 +42,14 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"guacamole_user":       guacamoleUser(),
-			"guacamole_user_group": guacamoleUserGroup(),
+			"guacamole_user":           guacamoleUser(),
+			"guacamole_user_group":     guacamoleUserGroup(),
+			"guacamole_connection_ssh": guacamoleConnectionSSH(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"guacamole_user":       dataSourceUser(),
-			"guacamole_user_group": dataSourceUserGroup(),
+			"guacamole_user":           dataSourceUser(),
+			"guacamole_user_group":     dataSourceUserGroup(),
+			"guacamole_connection_ssh": dataSourceConnectionSSH(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -73,21 +73,16 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		DisableCookies:         disableCookies,
 	}
 
-	err := validate(config)
-	if merr, ok := err.(*multierror.Error); ok {
-		for e := range merr.Errors {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Errors in guacamole provider configuration",
-				Detail:   merr.Errors[e].Error(),
-			})
-		}
-		return nil, diags
+	// Check for required provider parameters
+	check := validate(config)
+
+	if check.HasError() {
+		return nil, check
 	}
 
-	c := guac.New(config)
+	client := guac.New(config)
 
-	err = c.Connect()
+	err := client.Connect()
 
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
@@ -99,21 +94,34 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diags
 	}
 
-	return &c, diags
+	return &client, diags
 }
 
 // validate validates the config needed to initialize a guacamole client,
 // returning a single error with all validation errors, or nil if no error.
-func validate(config guac.Config) error {
-	var err *multierror.Error
+func validate(config guac.Config) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	if config.URL == "" {
-		err = multierror.Append(err, fmt.Errorf("URL must be configured for the guacamole provider"))
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Missing provider parameter",
+			Detail:   "URL must be configured for the guacamole provider",
+		})
 	}
 	if config.Username == "" {
-		err = multierror.Append(err, fmt.Errorf("Username must be configured for the guacamole provider"))
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Missing provider parameter",
+			Detail:   "Username must be configured for the guacamole provider",
+		})
 	}
 	if config.Password == "" {
-		err = multierror.Append(err, fmt.Errorf("Password must be configured for the guacamole provider"))
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Missing provider parameter",
+			Detail:   "Password must be configured for the guacamole provider",
+		})
 	}
-	return err.ErrorOrNil()
+	return diags
 }

@@ -7,7 +7,7 @@ type GuacConnection struct {
 	ParentIdentifier  string                   `json:"parentIdentifier"`
 	Protocol          string                   `json:"protocol"`
 	Attributes        GuacConnectionAttributes `json:"attributes"`
-	Properties        GuacConnectionParameters `json:"parameters"`
+	Parameters        GuacConnectionParameters `json:"parameters"`
 	ActiveConnections int                      `json:"activeConnections,omitempty"`
 }
 
@@ -182,4 +182,132 @@ type GuacConnectionParameters struct {
 	Container string `json:"container,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
 	Pod       string `json:"pod,omitempty"`
+}
+
+// ValidEncryptionTypes returns a list of valid encryption types
+func (GuacConnectionAttributes) ValidEncryptionTypes() []string {
+	return []string{
+		"none",
+		"ssl",
+	}
+}
+
+// ValidColorSchemes returns a list of valid color schemes
+func (GuacConnectionParameters) ValidColorSchemes() []string {
+	return []string{
+		"black-white",
+		"gray-black",
+		"green-black",
+		"white-black",
+	}
+}
+
+// ValidFontSizes returns a list of valid font sizes
+func (GuacConnectionParameters) ValidFontSizes() []string {
+	return []string{
+		"8",
+		"9",
+		"10",
+		"11",
+		"12",
+		"14",
+		"18",
+		"24",
+		"30",
+		"36",
+		"48",
+		"60",
+		"72",
+		"96",
+	}
+}
+
+// ValidBackspaceCodes returns a list of valid backspace codes
+func (GuacConnectionParameters) ValidBackspaceCodes() []string {
+	return []string{
+		"127",
+		"8",
+	}
+}
+
+// ValidTerminalTypes returns a list of valid terminaly types
+func (GuacConnectionParameters) ValidTerminalTypes() []string {
+	return []string{
+		"ansi",
+		"linux",
+		"vt100",
+		"vt220",
+		"xterm",
+		"xterm-25color",
+	}
+}
+
+// ValidCursors returns a list of valid cursors
+func (GuacConnectionParameters) ValidCursors() []string {
+	return []string{
+		"local",
+		"remote",
+	}
+}
+
+// ValidColorDepths returns a list of valid color depths
+func (GuacConnectionParameters) ValidColorDepths() []string {
+	return []string{
+		"8",
+		"16",
+		"24",
+		"32",
+	}
+}
+
+// ValidClipboardEncodings returns a list of valid clipboard encodings
+func (GuacConnectionParameters) ValidClipboardEncodings() []string {
+	return []string{
+		"CP1252",
+		"ISO8859-1",
+		"UTF-16",
+		"UTF-8",
+	}
+}
+
+// ValidSecurityModes returns a list of valid security modes
+func (GuacConnectionParameters) ValidSecurityModes() []string {
+	return []string{
+		"any",
+		"nla",
+		"rdp",
+		"tls",
+		"vmconnect",
+	}
+}
+
+// ValidKeyboardLayouts returns a list of valid keyboard layouts
+func (GuacConnectionParameters) ValidKeyboardLayouts() []string {
+	return []string{
+		"da-dk-qwerty",
+		"de-ch-qwertz",
+		"de-de-qwertz",
+		"en-gb-qwerty",
+		"en-us-qwerty",
+		"es-es-qwerty",
+		"es-latam-qwerty",
+		"failsafe",
+		"fr-be-azerty",
+		"fr-ch-qwertz",
+		"fr-fr-azerty",
+		"hu-hu-qwertz",
+		"it-it-qwerty",
+		"ja-jp-qwerty",
+		"pt-br-qwerty",
+		"sv-se-qwerty",
+		"tr-tr-qwerty",
+	}
+}
+
+// ValidResizeMethods returns a list of valid resize methods
+func (GuacConnectionParameters) ValidResizeMethods() []string {
+	return []string{
+		"display-update",
+		"reconnect",
+	}
 }

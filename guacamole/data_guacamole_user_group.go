@@ -21,15 +21,13 @@ func dataSourceUserGroup() *schema.Resource {
 			"attributes": {
 				Type:        schema.TypeList,
 				Description: "Attributes of guacamole user group",
-				Optional:    true,
-				MaxItems:    1,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"disabled": {
 							Type:        schema.TypeBool,
 							Description: "Whether group is disabled",
-							Optional:    true,
-							Default:     false,
+							Computed:    true,
 						},
 					},
 				},
@@ -37,8 +35,7 @@ func dataSourceUserGroup() *schema.Resource {
 			"parent_groups": {
 				Type:        schema.TypeSet,
 				Description: "Member groups of a guacamole user group",
-				Optional:    true,
-				MaxItems:    1,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -46,8 +43,7 @@ func dataSourceUserGroup() *schema.Resource {
 			"member_groups": {
 				Type:        schema.TypeSet,
 				Description: "Member groups of a guacamole user group",
-				Optional:    true,
-				MaxItems:    1,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -55,8 +51,7 @@ func dataSourceUserGroup() *schema.Resource {
 			"member_users": {
 				Type:        schema.TypeSet,
 				Description: "Member users of a guacamole user group",
-				Optional:    true,
-				MaxItems:    1,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -64,8 +59,7 @@ func dataSourceUserGroup() *schema.Resource {
 			"system_permissions": {
 				Type:        schema.TypeSet,
 				Description: "Member users of a guacamole user group",
-				Optional:    true,
-				MaxItems:    1,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
