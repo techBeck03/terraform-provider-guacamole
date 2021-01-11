@@ -66,17 +66,10 @@ func (c *Client) ReadConnection(identifier string) (types.GuacConnection, error)
 // ReadConnectionByPath gets a connection by path (Parent/Name)
 func (c *Client) ReadConnectionByPath(path string) (types.GuacConnection, error) {
 	var ret types.GuacConnection
-	var retParams types.GuacConnectionParameters
 	var parentIdentifier string
 
 	splitPath := strings.Split(path, "/")
-	connectionTree, err := c.GetConnectionTree()
-
-	if err != nil {
-		return ret, err
-	}
-
-	flattenedConnections, flattenedGroups, err := flatten([]types.GuacConnectionGroup{connectionTree})
+	groups, err := c.ListConnectionGroups()
 
 	if err != nil {
 		return ret, err
@@ -85,9 +78,9 @@ func (c *Client) ReadConnectionByPath(path string) (types.GuacConnection, error)
 	if strings.ToUpper(splitPath[0]) == "ROOT" {
 		parentIdentifier = "ROOT"
 	} else {
-		for group := range flattenedGroups {
-			if flattenedGroups[group].Name == splitPath[0] {
-				parentIdentifier = flattenedGroups[group].Identifier
+		for _, group := range groups {
+			if group.Name == splitPath[0] {
+				parentIdentifier = group.Identifier
 				break
 			}
 		}
@@ -97,9 +90,18 @@ func (c *Client) ReadConnectionByPath(path string) (types.GuacConnection, error)
 		return ret, fmt.Errorf("No connection group found for parent with name: %s", splitPath[0])
 	}
 
-	for connection := range flattenedConnections {
-		if (flattenedConnections[connection].ParentIdentifier == parentIdentifier) && (flattenedConnections[connection].Name == splitPath[1]) {
-			ret = flattenedConnections[connection]
+	connections, err := c.ListConnections()
+
+	if err != nil {
+		return ret, err
+	}
+
+	for _, connection := range connections {
+		if (connection.ParentIdentifier == parentIdentifier) && (connection.Name == splitPath[1]) {
+			ret, err = c.ReadConnection(connection.Identifier)
+			if err != nil {
+				return ret, err
+			}
 			break
 		}
 	}
@@ -107,20 +109,6 @@ func (c *Client) ReadConnectionByPath(path string) (types.GuacConnection, error)
 	if ret.Identifier == "" {
 		return ret, fmt.Errorf("No connection group found with parentIdentifier = %s\tname = %s", parentIdentifier, splitPath[1])
 	}
-
-	// Get connection parameters
-	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/parameters", c.baseURL, connectionsBasePath, ret.Identifier), nil)
-
-	if err != nil {
-		return ret, err
-	}
-
-	err = c.Call(request, &retParams)
-	if err != nil {
-		return ret, err
-	}
-
-	ret.Parameters = retParams
 
 	return ret, nil
 }
@@ -158,14 +146,21 @@ func (c *Client) DeleteConnection(identifier string) error {
 // ListConnections lists all connections
 func (c *Client) ListConnections() ([]types.GuacConnection, error) {
 	var ret []types.GuacConnection
-	connectionTree, err := c.GetConnectionTree()
+	var connectionList map[string]types.GuacConnection
+
+	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s", c.baseURL, connectionsBasePath), nil)
 
 	if err != nil {
 		return ret, err
 	}
 
-	flattenedConnections, _, err := flatten([]types.GuacConnectionGroup{connectionTree})
+	err = c.Call(request, &connectionList)
+	if err != nil {
+		return ret, err
+	}
 
-	ret = flattenedConnections
+	for _, connection := range connectionList {
+		ret = append(ret, connection)
+	}
 	return ret, nil
 }

@@ -42,14 +42,16 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"guacamole_user":           guacamoleUser(),
-			"guacamole_user_group":     guacamoleUserGroup(),
-			"guacamole_connection_ssh": guacamoleConnectionSSH(),
+			"guacamole_user":             guacamoleUser(),
+			"guacamole_user_group":       guacamoleUserGroup(),
+			"guacamole_connection_ssh":   guacamoleConnectionSSH(),
+			"guacamole_connection_group": guacamoleConnectionGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"guacamole_user":           dataSourceUser(),
-			"guacamole_user_group":     dataSourceUserGroup(),
-			"guacamole_connection_ssh": dataSourceConnectionSSH(),
+			"guacamole_user":             dataSourceUser(),
+			"guacamole_user_group":       dataSourceUserGroup(),
+			"guacamole_connection_ssh":   dataSourceConnectionSSH(),
+			"guacamole_connection_group": dataSourceConnectionGroup(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

@@ -13,9 +13,9 @@ const (
 )
 
 // GetConnectionTree gets the connection tree starting from ROOT
-func (c *Client) GetConnectionTree() (types.GuacConnectionGroup, error) {
+func (c *Client) GetConnectionTree(identifier string) (types.GuacConnectionGroup, error) {
 	var ret types.GuacConnectionGroup
-	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/ROOT/tree", c.baseURL, connectionGroupsBasePath), nil)
+	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/tree", c.baseURL, connectionGroupsBasePath, identifier), nil)
 
 	if err != nil {
 		return ret, err
@@ -76,15 +76,28 @@ func (c *Client) ReadConnectionGroup(identifier string) (types.GuacConnectionGro
 	var ret types.GuacConnectionGroup
 
 	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionGroupsBasePath, identifier), nil)
-
-	if err != nil {
-		return ret, err
-	}
-
 	err = c.Call(request, &ret)
 	if err != nil {
 		return ret, err
 	}
+
+	connectionTree, err := c.GetConnectionTree(identifier)
+
+	if err != nil {
+		return ret, err
+	}
+
+	for _, group := range connectionTree.ChildGroups {
+		ret.ChildGroups = append(ret.ChildGroups, types.GuacConnectionGroup{
+			Name:              group.Name,
+			Identifier:        group.Identifier,
+			ParentIdentifier:  group.ParentIdentifier,
+			Type:              group.Type,
+			ActiveConnections: group.ActiveConnections,
+		})
+	}
+
+	ret.ChildConnections = connectionTree.ChildConnections
 
 	return ret, nil
 }
@@ -116,9 +129,13 @@ func (c *Client) ReadConnectionGroupByPath(path string) (types.GuacConnectionGro
 		return ret, fmt.Errorf("No connection group found for parent with name: %s", splitPath[0])
 	}
 
-	for group := range groups {
-		if (groups[group].ParentIdentifier == parentIdentifier) && (groups[group].Name == splitPath[1]) {
-			ret = groups[group]
+	for _, group := range groups {
+		if (group.ParentIdentifier == parentIdentifier) && (group.Name == splitPath[1]) {
+			readGroup, err := c.ReadConnectionGroup(group.Identifier)
+			if err != nil {
+				return ret, err
+			}
+			ret = readGroup
 			break
 		}
 	}
@@ -163,14 +180,22 @@ func (c *Client) DeleteConnectionGroup(identifier string) error {
 // ListConnectionGroups lists all connections
 func (c *Client) ListConnectionGroups() ([]types.GuacConnectionGroup, error) {
 	var ret []types.GuacConnectionGroup
-	connectionTree, err := c.GetConnectionTree()
+	var connectionGroupList map[string]types.GuacConnectionGroup
+
+	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s", c.baseURL, connectionGroupsBasePath), nil)
 
 	if err != nil {
 		return ret, err
 	}
 
-	_, flattenedGroups, err := flatten([]types.GuacConnectionGroup{connectionTree})
+	err = c.Call(request, &connectionGroupList)
+	if err != nil {
+		return ret, err
+	}
 
-	ret = flattenedGroups
+	for _, group := range connectionGroupList {
+		ret = append(ret, group)
+	}
+
 	return ret, nil
 }

@@ -34,7 +34,7 @@ func guacamoleUserGroup() *schema.Resource {
 							Type:        schema.TypeBool,
 							Description: "Whether group is disabled",
 							Optional:    true,
-							Default:     false,
+							Computed:    true,
 						},
 					},
 				},

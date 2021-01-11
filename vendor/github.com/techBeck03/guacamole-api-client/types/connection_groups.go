@@ -18,3 +18,11 @@ type GuacConnectionGroupAttributes struct {
 	MaxConnectionsPerUser string `json:"max-connections-per-user"`
 	EnableSessionAffinity string `json:"enable-session-affinity"`
 }
+
+// ValidTypes returns list of valid types
+func (GuacConnectionGroup) ValidTypes() []string {
+	return []string{
+		"ORGANIZATIONAL",
+		"BALANCING",
+	}
+}
