@@ -345,7 +345,7 @@ func resourceConnectionSSHRead(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	check := convertGuacConnectionToResourceData(d, &connection)
+	check := convertGuacConnectionSSHToResourceData(d, &connection)
 	if check.HasError() {
 		return check
 	}
@@ -367,7 +367,7 @@ func resourceConnectionSSHCreate(ctx context.Context, d *schema.ResourceData, m 
 		return validate
 	}
 
-	connection, check := convertResourceDataToGuacConnection(d)
+	connection, check := convertResourceDataToGuacConnectionSSH(d)
 
 	if check.HasError() {
 		return check
@@ -402,7 +402,7 @@ func resourceConnectionSSHUpdate(ctx context.Context, d *schema.ResourceData, m 
 			return validate
 		}
 
-		connection, check := convertResourceDataToGuacConnection(d)
+		connection, check := convertResourceDataToGuacConnectionSSH(d)
 
 		if check.HasError() {
 			return check
@@ -442,7 +442,7 @@ func resourceConnectionSSHDelete(ctx context.Context, d *schema.ResourceData, m 
 	return diags
 }
 
-func convertGuacConnectionToResourceData(d *schema.ResourceData, connection *types.GuacConnection) diag.Diagnostics {
+func convertGuacConnectionSSHToResourceData(d *schema.ResourceData, connection *types.GuacConnection) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
@@ -472,6 +472,7 @@ func convertGuacConnectionToResourceData(d *schema.ResourceData, connection *typ
 		"port":                        connection.Parameters.Port,
 		"public_host_key":             connection.Parameters.PublicHostKey,
 		"username":                    connection.Parameters.Username,
+		"password":                    connection.Parameters.Password,
 		"private_key":                 connection.Parameters.PrivateKey,
 		"passphrase":                  connection.Parameters.Passphrase,
 		"color_scheme":                connection.Parameters.ColorScheme,
@@ -618,7 +619,7 @@ func validateConnectionSSH(d *schema.ResourceData, client *guac.Client) diag.Dia
 	return diags
 }
 
-func convertResourceDataToGuacConnection(d *schema.ResourceData) (types.GuacConnection, diag.Diagnostics) {
+func convertResourceDataToGuacConnectionSSH(d *schema.ResourceData) (types.GuacConnection, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var connection types.GuacConnection
 
@@ -651,6 +652,7 @@ func convertResourceDataToGuacConnection(d *schema.ResourceData) (types.GuacConn
 			Port:                    attributes["port"].(string),
 			PublicHostKey:           attributes["public_host_key"].(string),
 			Username:                attributes["username"].(string),
+			Password:                attributes["password"].(string),
 			PrivateKey:              attributes["private_key"].(string),
 			Passphrase:              attributes["passphrase"].(string),
 			ColorScheme:             attributes["color_scheme"].(string),

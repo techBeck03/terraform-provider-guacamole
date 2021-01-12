@@ -10,7 +10,7 @@ import (
 	types "github.com/techBeck03/guacamole-api-client/types"
 )
 
-func dataSourceConnectionSSH() *schema.Resource {
+func dataSourceConnectionRDP() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceConnectionSSHRead,
 		Schema: map[string]*schema.Schema{
@@ -105,19 +105,9 @@ func dataSourceConnectionSSH() *schema.Resource {
 							Description: "Port for target connection",
 							Computed:    true,
 						},
-						"public_host_key": {
-							Type:        schema.TypeString,
-							Description: "Public host key",
-							Computed:    true,
-						},
 						"username": {
 							Type:        schema.TypeString,
-							Description: "Username for ssh connection",
-							Computed:    true,
-						},
-						"private_key": {
-							Type:        schema.TypeString,
-							Description: "Private key for ssh connection",
+							Description: "Username for rdp connection",
 							Computed:    true,
 						},
 						"passphrase": {
@@ -282,7 +272,7 @@ func dataSourceConnectionSSH() *schema.Resource {
 	}
 }
 
-func dataSourceConnectionSSHRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceConnectionRDPRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*guac.Client)
 
 	// Warning or errors can be collected in a slice type
@@ -325,7 +315,7 @@ func dataSourceConnectionSSHRead(ctx context.Context, d *schema.ResourceData, m 
 		connection = c
 	}
 
-	check := convertGuacConnectionSSHToResourceData(d, &connection)
+	check := convertGuacConnectionRDPToResourceData(d, &connection)
 
 	if check.HasError() {
 		return check
