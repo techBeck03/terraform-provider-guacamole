@@ -595,7 +595,7 @@ func resourceConnectionRDPCreate(ctx context.Context, d *schema.ResourceData, m 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	validate := validateConnectionSSH(d, client)
+	validate := validateConnectionRDP(d, client)
 
 	if validate.HasError() {
 		return validate
@@ -620,7 +620,7 @@ func resourceConnectionRDPCreate(ctx context.Context, d *schema.ResourceData, m 
 		return diags
 	}
 
-	return resourceConnectionSSHRead(ctx, d, m)
+	return resourceConnectionRDPRead(ctx, d, m)
 }
 
 func resourceConnectionRDPUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -630,7 +630,7 @@ func resourceConnectionRDPUpdate(ctx context.Context, d *schema.ResourceData, m 
 	var diags diag.Diagnostics
 
 	if d.HasChanges("name", "identifier", "parent_identifier", "attributes", "parameters") {
-		validate := validateConnectionSSH(d, client)
+		validate := validateConnectionRDP(d, client)
 
 		if validate.HasError() {
 			return validate
@@ -658,7 +658,7 @@ func resourceConnectionRDPUpdate(ctx context.Context, d *schema.ResourceData, m 
 		return diags
 	}
 
-	return resourceConnectionSSHRead(ctx, d, m)
+	return resourceConnectionRDPRead(ctx, d, m)
 }
 
 func resourceConnectionRDPDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -903,7 +903,7 @@ func convertResourceDataToGuacConnectionRDP(d *schema.ResourceData) (types.GuacC
 	connection.Name = d.Get("name").(string)
 	connection.Identifier = d.Get("identifier").(string)
 	connection.ParentIdentifier = d.Get("parent_identifier").(string)
-	connection.Protocol = "ssh"
+	connection.Protocol = "rdp"
 
 	attributeList := d.Get("attributes").([]interface{})
 
