@@ -139,7 +139,7 @@ func guacamoleConnectionRDP() *schema.Resource {
 							Computed:    true,
 						},
 						"disable_authentication": {
-							Type:        schema.TypeString,
+							Type:        schema.TypeBool,
 							Description: "Disable rdp authentication",
 							Optional:    true,
 							Computed:    true,
@@ -510,7 +510,7 @@ func guacamoleConnectionRDP() *schema.Resource {
 							Optional:    true,
 							Computed:    true,
 						},
-						"sftp_default_upload": {
+						"sftp_upload_directory": {
 							Type:        schema.TypeString,
 							Description: "SFTP default upload directory",
 							Optional:    true,
