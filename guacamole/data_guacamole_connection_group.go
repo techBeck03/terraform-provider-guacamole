@@ -68,40 +68,6 @@ func dataSourceConnectionGroup() *schema.Resource {
 					},
 				},
 			},
-			"member_groups": {
-				Type:        schema.TypeList,
-				Description: "Member groups of a guacamole connection group",
-				Computed:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"identifier": {
-							Type:        schema.TypeString,
-							Description: "Guacd proxy port",
-							Computed:    true,
-						},
-						"parent_identifier": {
-							Type:        schema.TypeString,
-							Description: "Parent Identifier of guacamole connection group",
-							Optional:    true,
-						},
-						"name": {
-							Type:        schema.TypeString,
-							Description: "Identifier of guacamole connection group",
-							Computed:    true,
-						},
-						"type": {
-							Type:        schema.TypeString,
-							Description: "Identifier of guacamole connection group",
-							Computed:    true,
-						},
-						"active_connections": {
-							Type:        schema.TypeInt,
-							Description: "Identifier of guacamole connection group",
-							Computed:    true,
-						},
-					},
-				},
-			},
 			"member_connections": {
 				Type:        schema.TypeList,
 				Description: "Member connections of a guacamole connection group",

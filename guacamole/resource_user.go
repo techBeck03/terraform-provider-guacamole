@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -116,6 +117,22 @@ func guacamoleUser() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"connections": {
+				Type:        schema.TypeSet,
+				Description: "Connections identifiers a user has permission to read",
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"connection_groups": {
+				Type:        schema.TypeSet,
+				Description: "Connection Group identifiers a user has permission to read",
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -123,6 +140,11 @@ func guacamoleUser() *schema.Resource {
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	client := m.(*guac.Client)
+
+	check := validateUser(d)
+	if check.HasError() {
+		return check
+	}
 
 	user, err := convertResourceDataToGuacUser(d)
 
@@ -182,11 +204,44 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		}
 	}
 
+	if !diags.HasError() {
+		var connectionPermissionItems []types.GuacPermissionItem
+		connectionSet, ok := d.GetOk("connections")
+		var connections []string
+		for _, connection := range connectionSet.(*schema.Set).List() {
+			connections = append(connections, connection.(string))
+		}
+		if ok && len(connections) > 0 {
+			for _, connection := range connections {
+				connectionPermissionItems = append(connectionPermissionItems, client.NewAddConnectionPermission(connection))
+			}
+		}
+
+		connectionGroupSet, ok := d.GetOk("connection_groups")
+		var connectionGroups []string
+		for _, connectionGroup := range connectionGroupSet.(*schema.Set).List() {
+			connectionGroups = append(connectionGroups, connectionGroup.(string))
+		}
+		if ok && len(connectionGroups) > 0 {
+			for _, connectionGroup := range connectionGroups {
+				connectionPermissionItems = append(connectionPermissionItems, client.NewAddConnectionGroupPermission(connectionGroup))
+			}
+		}
+
+		if len(connectionPermissionItems) > 0 {
+			err = client.SetUserPermissions(user.Username, &connectionPermissionItems)
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+				goto Cleanup
+			}
+		}
+	}
+
 	d.SetId(user.Username)
 	return resourceUserRead(ctx, d, m)
 Cleanup:
 	d.SetId(user.Username)
-	check := resourceUserDelete(ctx, d, m)
+	check = resourceUserDelete(ctx, d, m)
 	if check.HasError() {
 		diags = append(diags, check...)
 	}
@@ -236,6 +291,22 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	d.Set("system_permissions", permissions.SystemPermissions)
 
+	// Get connections
+	var connections []string
+	for connection := range permissions.ConnectionPermissions {
+		connections = append(connections, connection)
+	}
+
+	d.Set("connections", connections)
+
+	// Get connection groups
+	var connectionGroups []string
+	for group := range permissions.ConnectionGroupPermissions {
+		connectionGroups = append(connectionGroups, group)
+	}
+
+	d.Set("connection_groups", connectionGroups)
+
 	return diags
 }
 
@@ -243,6 +314,11 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	client := m.(*guac.Client)
 
 	if d.HasChanges("username", "last_active", "attributes") {
+		check := validateUser(d)
+		if check.HasError() {
+			return check
+		}
+
 		user, err := convertResourceDataToGuacUser(d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -323,6 +399,74 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 			}
 			for _, permission := range addPermissions {
 				permissionItems = append(permissionItems, client.NewAddSystemPermission(permission))
+			}
+		}
+		if len(permissionItems) > 0 {
+			err := client.SetUserPermissions(d.Id(), &permissionItems)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
+	if d.HasChange("connections") {
+		var permissionItems []types.GuacPermissionItem
+		old, new := d.GetChange("connections")
+		var oldConnections, newConnnections []string
+
+		for _, connection := range old.(*schema.Set).List() {
+			oldConnections = append(oldConnections, connection.(string))
+		}
+
+		for _, connection := range new.(*schema.Set).List() {
+			newConnnections = append(newConnnections, connection.(string))
+		}
+
+		removeConnections := sliceDiff(oldConnections, newConnnections, false)
+		if len(removeConnections) > 0 {
+			for _, connection := range removeConnections {
+				permissionItems = append(permissionItems, client.NewRemoveConnectionPermission(connection))
+			}
+		}
+
+		addConnections := sliceDiff(newConnnections, oldConnections, false)
+		if len(addConnections) > 0 {
+			for _, connection := range addConnections {
+				permissionItems = append(permissionItems, client.NewAddConnectionPermission(connection))
+			}
+		}
+		if len(permissionItems) > 0 {
+			err := client.SetUserPermissions(d.Id(), &permissionItems)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
+	if d.HasChange("connection_groups") {
+		var permissionItems []types.GuacPermissionItem
+		old, new := d.GetChange("connection_groups")
+		var oldConnectionGroups, newConnectionGroups []string
+
+		for _, connection := range old.(*schema.Set).List() {
+			oldConnectionGroups = append(oldConnectionGroups, connection.(string))
+		}
+
+		for _, connection := range new.(*schema.Set).List() {
+			newConnectionGroups = append(newConnectionGroups, connection.(string))
+		}
+
+		removeConnectionGroups := sliceDiff(oldConnectionGroups, newConnectionGroups, false)
+		if len(removeConnectionGroups) > 0 {
+			for _, connection := range removeConnectionGroups {
+				permissionItems = append(permissionItems, client.NewRemoveConnectionGroupPermission(connection))
+			}
+		}
+
+		addConnectionGroups := sliceDiff(newConnectionGroups, oldConnectionGroups, false)
+		if len(addConnectionGroups) > 0 {
+			for _, connection := range addConnectionGroups {
+				permissionItems = append(permissionItems, client.NewAddConnectionGroupPermission(connection))
 			}
 		}
 		if len(permissionItems) > 0 {
@@ -433,6 +577,28 @@ func validateGroups(client *guac.Client, groups []string) diag.Diagnostics {
 			Detail:   fmt.Sprintf("The following groups are invalid for group_membership: %s", strings.Join(invalidUserGroups[:], ", ")),
 		})
 		return diags
+	}
+	return diags
+}
+
+func validateUser(d *schema.ResourceData) diag.Diagnostics {
+	var diags diag.Diagnostics
+	// validate attributes
+	attributeList := d.Get("attributes").([]interface{})
+
+	if len(attributeList) > 0 {
+		attributes := attributeList[0].(map[string]interface{})
+
+		// validate timezone string
+		timezone := attributes["timezone"].(string)
+		_, err := time.LoadLocation(timezone)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid timezone",
+				Detail:   fmt.Sprintf("Unable to process timezone string: %s", timezone),
+			})
+		}
 	}
 	return diags
 }

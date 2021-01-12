@@ -82,7 +82,7 @@ github.com/mitchellh/mapstructure
 github.com/mitchellh/reflectwalk
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
-# github.com/techBeck03/guacamole-api-client v1.2.9
+# github.com/techBeck03/guacamole-api-client v1.2.10
 ## explicit
 github.com/techBeck03/guacamole-api-client
 github.com/techBeck03/guacamole-api-client/types

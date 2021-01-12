@@ -1,6 +1,10 @@
 package guacamole
 
-import "github.com/techBeck03/guacamole-api-client/types"
+import (
+	"fmt"
+
+	"github.com/techBeck03/guacamole-api-client/types"
+)
 
 const (
 	// ConnectionPermissionsBasePath defines base path for connection permissions
@@ -50,5 +54,41 @@ func (c *Client) NewRemoveSystemPermission(permission string) types.GuacPermissi
 		Op:    "remove",
 		Path:  "/systemPermissions",
 		Value: permission,
+	}
+}
+
+// NewRemoveConnectionPermission creates a formatted guac permission item for removing a user connection permission
+func (c *Client) NewRemoveConnectionPermission(identifier string) types.GuacPermissionItem {
+	return types.GuacPermissionItem{
+		Op:    "remove",
+		Path:  fmt.Sprintf("%s/%s", ConnectionPermissionsBasePath, identifier),
+		Value: "READ",
+	}
+}
+
+// NewAddConnectionPermission creates a formatted guac permission item for adding a user connection permission
+func (c *Client) NewAddConnectionPermission(identifier string) types.GuacPermissionItem {
+	return types.GuacPermissionItem{
+		Op:    "add",
+		Path:  fmt.Sprintf("%s/%s", ConnectionPermissionsBasePath, identifier),
+		Value: "READ",
+	}
+}
+
+// NewRemoveConnectionGroupPermission creates a formatted guac permission item for removing a user connection permission
+func (c *Client) NewRemoveConnectionGroupPermission(identifier string) types.GuacPermissionItem {
+	return types.GuacPermissionItem{
+		Op:    "remove",
+		Path:  fmt.Sprintf("%s/%s", ConnectionGroupPermissionsBasePath, identifier),
+		Value: "READ",
+	}
+}
+
+// NewAddConnectionGroupPermission creates a formatted guac permission item for adding a user connection permission
+func (c *Client) NewAddConnectionGroupPermission(identifier string) types.GuacPermissionItem {
+	return types.GuacPermissionItem{
+		Op:    "add",
+		Path:  fmt.Sprintf("%s/%s", ConnectionGroupPermissionsBasePath, identifier),
+		Value: "READ",
 	}
 }
