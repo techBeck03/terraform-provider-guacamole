@@ -46,6 +46,7 @@ func Provider() *schema.Provider {
 			"guacamole_user_group":       guacamoleUserGroup(),
 			"guacamole_connection_ssh":   guacamoleConnectionSSH(),
 			"guacamole_connection_rdp":   guacamoleConnectionRDP(),
+			"guacamole_connection_vnc":   guacamoleConnectionVNC(),
 			"guacamole_connection_group": guacamoleConnectionGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -53,6 +54,7 @@ func Provider() *schema.Provider {
 			"guacamole_user_group":       dataSourceUserGroup(),
 			"guacamole_connection_ssh":   dataSourceConnectionSSH(),
 			"guacamole_connection_rdp":   dataSourceConnectionRDP(),
+			"guacamole_connection_vnc":   dataSourceConnectionVNC(),
 			"guacamole_connection_group": dataSourceConnectionGroup(),
 		},
 		ConfigureContextFunc: providerConfigure,

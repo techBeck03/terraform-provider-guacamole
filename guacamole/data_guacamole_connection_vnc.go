@@ -10,9 +10,9 @@ import (
 	types "github.com/techBeck03/guacamole-api-client/types"
 )
 
-func dataSourceConnectionTelnet() *schema.Resource {
+func dataSourceConnectionVNC() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceConnectionTelnetRead,
+		ReadContext: dataSourceConnectionVNCRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
@@ -91,7 +91,7 @@ func dataSourceConnectionTelnet() *schema.Resource {
 			"parameters": {
 				Type:        schema.TypeList,
 				Description: "Guacamole connection parameters",
-				Optional:    true,
+				Required:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -103,56 +103,42 @@ func dataSourceConnectionTelnet() *schema.Resource {
 						"port": {
 							Type:        schema.TypeString,
 							Description: "Port for target connection",
+							Optional:    true,
 							Computed:    true,
 						},
 						"username": {
 							Type:        schema.TypeString,
-							Description: "Username for telnet connection",
-							Computed:    true,
+							Description: "Username for vnc connection",
+							Required:    true,
 						},
-						"username_regex": {
+						"password": {
 							Type:        schema.TypeString,
-							Description: "Username regex for telnet connection",
-							Computed:    true,
-						},
-						"password_regex": {
-							Type:        schema.TypeString,
-							Description: "Password regex for telnet connection",
-							Computed:    true,
-						},
-						"login_success_regex": {
-							Type:        schema.TypeString,
-							Description: "Login success regex for telnet connection",
-							Computed:    true,
-						},
-						"login_failure_regex": {
-							Type:        schema.TypeString,
-							Description: "Login failure regex for telnet connection",
-							Computed:    true,
-						},
-						"color_scheme": {
-							Type:        schema.TypeString,
-							Description: "Display color scheme",
-							Computed:    true,
-						},
-						"font_name": {
-							Type:        schema.TypeString,
-							Description: "Display font name",
-							Computed:    true,
-						},
-						"font_size": {
-							Type:        schema.TypeString,
-							Description: "Display font size",
-							Computed:    true,
-						},
-						"max_scrollback_size": {
-							Type:        schema.TypeString,
-							Description: "Display maximum scrollback",
+							Description: "Password for vnc connection",
 							Computed:    true,
 						},
 						"readonly": {
 							Type:        schema.TypeBool,
 							Description: "Display is readonly",
+							Computed:    true,
+						},
+						"swap_red_blue": {
+							Type:        schema.TypeBool,
+							Description: "Swap red/blue Components",
+							Computed:    true,
+						},
+						"cursor": {
+							Type:        schema.TypeString,
+							Description: "Local or remote cursor",
+							Computed:    true,
+						},
+						"color_depth": {
+							Type:        schema.TypeString,
+							Description: "Color depth",
+							Computed:    true,
+						},
+						"clipboard_encoding": {
+							Type:        schema.TypeString,
+							Description: "Clipboard encoding",
 							Computed:    true,
 						},
 						"disable_copy": {
@@ -165,29 +151,14 @@ func dataSourceConnectionTelnet() *schema.Resource {
 							Description: "Disable pasting from client",
 							Computed:    true,
 						},
-						"backspace": {
+						"destination_host": {
 							Type:        schema.TypeString,
-							Description: "Backspace key sends",
+							Description: "VNC repeater destination host",
 							Computed:    true,
 						},
-						"terminal_type": {
+						"destination_port": {
 							Type:        schema.TypeString,
-							Description: "Terminal type",
-							Computed:    true,
-						},
-						"typescript_path": {
-							Type:        schema.TypeString,
-							Description: "Typescript path",
-							Computed:    true,
-						},
-						"typescript_name": {
-							Type:        schema.TypeString,
-							Description: "Typescript name",
-							Computed:    true,
-						},
-						"typescript_auto_create_path": {
-							Type:        schema.TypeBool,
-							Description: "Automatically create typescript path",
+							Description: "VN repeater destination port",
 							Computed:    true,
 						},
 						"recording_path": {
@@ -220,6 +191,81 @@ func dataSourceConnectionTelnet() *schema.Resource {
 							Description: "Auto create recording path",
 							Computed:    true,
 						},
+						"sftp_enable": {
+							Type:        schema.TypeBool,
+							Description: "Enable sftp",
+							Computed:    true,
+						},
+						"sftp_root_directory": {
+							Type:        schema.TypeString,
+							Description: "File browser root directory",
+							Computed:    true,
+						},
+						"sftp_hostname": {
+							Type:        schema.TypeString,
+							Description: "SFTP server hostname",
+							Computed:    true,
+						},
+						"sftp_port": {
+							Type:        schema.TypeString,
+							Description: "SFTP server port",
+							Computed:    true,
+						},
+						"sftp_host_key": {
+							Type:        schema.TypeString,
+							Description: "SFTP server public host key (Base64)",
+							Computed:    true,
+						},
+						"sftp_username": {
+							Type:        schema.TypeString,
+							Description: "SFTP server username",
+							Computed:    true,
+						},
+						"sftp_password": {
+							Type:        schema.TypeString,
+							Description: "SFTP server password",
+							Computed:    true,
+						},
+						"sftp_private_key": {
+							Type:        schema.TypeString,
+							Description: "SFTP server private key",
+							Computed:    true,
+						},
+						"sftp_passphrase": {
+							Type:        schema.TypeString,
+							Description: "SFTP server private key passphrase",
+							Computed:    true,
+						},
+						"sftp_upload_directory": {
+							Type:        schema.TypeString,
+							Description: "SFTP default upload directory",
+							Computed:    true,
+						},
+						"sftp_keepalive_interval": {
+							Type:        schema.TypeString,
+							Description: "SFTP keepalive interval",
+							Computed:    true,
+						},
+						"sftp_disable_file_download": {
+							Type:        schema.TypeBool,
+							Description: "Disable file download",
+							Computed:    true,
+						},
+						"sftp_disable_file_upload": {
+							Type:        schema.TypeBool,
+							Description: "Disable file upload",
+							Computed:    true,
+						},
+						"enable_audio": {
+							Type:        schema.TypeBool,
+							Description: "Enable audio",
+							Computed:    true,
+						},
+						"audio_server_name": {
+							Type:        schema.TypeString,
+							Description: "Audio server name",
+							Computed:    true,
+						},
 						"wol_send_packet": {
 							Type:        schema.TypeBool,
 							Description: "Send WoL packet",
@@ -247,7 +293,7 @@ func dataSourceConnectionTelnet() *schema.Resource {
 	}
 }
 
-func dataSourceConnectionTelnetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceConnectionVNCRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*guac.Client)
 
 	// Warning or errors can be collected in a slice type
@@ -290,7 +336,7 @@ func dataSourceConnectionTelnetRead(ctx context.Context, d *schema.ResourceData,
 		connection = c
 	}
 
-	check := convertGuacConnectionTelnetToResourceData(d, &connection)
+	check := convertGuacConnectionVNCToResourceData(d, &connection)
 
 	if check.HasError() {
 		return check
