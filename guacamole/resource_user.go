@@ -35,6 +35,7 @@ func guacamoleUser() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "Attributes of guacamole user",
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -60,7 +61,7 @@ func guacamoleUser() *schema.Resource {
 							Type:        schema.TypeBool,
 							Description: "Whether the user is expired",
 							Optional:    true,
-							Computed:    true,
+							Computed:    false,
 						},
 						"timezone": {
 							Type:        schema.TypeString,
@@ -598,6 +599,22 @@ func validateUser(d *schema.ResourceData) diag.Diagnostics {
 				Summary:  "Invalid timezone",
 				Detail:   fmt.Sprintf("Unable to process timezone string: %s", timezone),
 			})
+		}
+
+		validFrom, changed := d.GetOk("attributes.0.valid_from")
+		if changed {
+			check := validateTimestring(validFrom.(string), "valid_from")
+			if check.HasError() {
+				diags = append(diags, check...)
+			}
+		}
+
+		validUntil, changed := d.GetOk("attributes.0.valid_until")
+		if changed {
+			check := validateTimestring(validUntil.(string), "valid_until")
+			if check.HasError() {
+				diags = append(diags, check...)
+			}
 		}
 	}
 	return diags
