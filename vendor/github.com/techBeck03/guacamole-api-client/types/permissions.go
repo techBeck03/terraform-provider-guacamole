@@ -32,6 +32,11 @@ func (SystemPermissions) CreateUser() string {
 	return "CREATE_USER"
 }
 
+// CreateUserGroup constant value option
+func (SystemPermissions) CreateUserGroup() string {
+	return "CREATE_USER_GROUP"
+}
+
 // CreateConnection constant value option
 func (SystemPermissions) CreateConnection() string {
 	return "CREATE_CONNECTION"
@@ -52,6 +57,7 @@ func (SystemPermissions) ValidChoices() []string {
 	return []string{
 		"ADMINISTER",
 		"CREATE_USER",
+		"CREATE_USER_GROUP",
 		"CREATE_CONNECTION",
 		"CREATE_CONNECTION_GROUP",
 		"CREATE_SHARING_PROFILE",

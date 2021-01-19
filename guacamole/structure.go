@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func stringToBool(v string) bool {
@@ -214,7 +216,12 @@ func mapToHclString(m map[string]interface{}) string {
 	keyValuePairs := []string{}
 
 	for key, value := range m {
-		keyValuePair := fmt.Sprintf(`%s = %s`, key, toHclString(value, true))
+		var keyValuePair string
+		if _, isMap := tryToConvertToGenericMap(value); isMap {
+			keyValuePair = fmt.Sprintf(`%s %s`, key, toHclString(value, true))
+		} else {
+			keyValuePair = fmt.Sprintf(`%s = %s`, key, toHclString(value, true))
+		}
 		keyValuePairs = append(keyValuePairs, keyValuePair)
 	}
 
@@ -258,4 +265,34 @@ func validateTimestring(timeString string, name string) diag.Diagnostics {
 		})
 	}
 	return diags
+}
+
+func testAccCheckTestSliceVals(resourceName string, key string, expected []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+
+		if !ok {
+			return fmt.Errorf("Not found: %s", resourceName)
+		}
+
+		v, ok := rs.Primary.Attributes[fmt.Sprintf("%s.#", key)]
+		if !ok {
+			return fmt.Errorf("%s: Attribute '%s.#' not found", resourceName, key)
+		}
+		testCount, _ := strconv.Atoi(v)
+		if testCount == 0 {
+			return fmt.Errorf("No entries found in state for key: %s", key)
+		}
+
+		var sv []string
+		for i := 0; i < testCount; i++ {
+			sv = append(sv, rs.Primary.Attributes[fmt.Sprintf("%s.%d", key, i)])
+		}
+
+		diff := sliceDiff(expected, sv, true)
+		if len(diff) > 0 {
+			return fmt.Errorf("Set values: %s do not match expected value: %s", sv, expected)
+		}
+		return nil
+	}
 }
