@@ -53,7 +53,7 @@ func testAccCheckGuacamoleConnectionGroupExists(resourceName string) resource.Te
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No OrderID set")
+			return fmt.Errorf("No connection group set")
 		}
 
 		return nil

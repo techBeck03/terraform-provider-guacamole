@@ -66,7 +66,7 @@ func testAccCheckGuacamoleUserGroupExists(resourceName string) resource.TestChec
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No OrderID set")
+			return fmt.Errorf("No group identifier set")
 		}
 
 		return nil

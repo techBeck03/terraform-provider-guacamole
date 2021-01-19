@@ -97,7 +97,7 @@ func testAccCheckGuacamoleUserExists(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No OrderID set")
+			return fmt.Errorf("No username set")
 		}
 
 		return nil
