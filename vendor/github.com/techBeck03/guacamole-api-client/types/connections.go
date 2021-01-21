@@ -167,7 +167,7 @@ type GuacConnectionParameters struct {
 	PreconnectionBLOB string `json:"preconnection-blob,omitempty"`
 
 	/*** RDP - Load Balancing ***/
-	LoadBalanceInfo string `json:"laod-balance-info,omitempty"`
+	LoadBalanceInfo string `json:"load-balance-info,omitempty"`
 
 	/*** VNC Repeater ***/
 	DestinationHost string `json:"dest-host,omitempty"`

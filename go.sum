@@ -271,8 +271,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/techBeck03/guacamole-api-client v1.2.11 h1:SIDXxdK8CliNh+ZsyGbVwiyaqQyq2cWDeF3KNCbYdmc=
-github.com/techBeck03/guacamole-api-client v1.2.11/go.mod h1:9pFTSahbIzCi7YJpTIB859rwYcKfG6f8GknBGwjZOtg=
+github.com/techBeck03/guacamole-api-client v1.2.12 h1:xjPTpwIXg5GF8qJZBPHY2knXJiiyyNPKezUl4I5Ier8=
+github.com/techBeck03/guacamole-api-client v1.2.12/go.mod h1:9pFTSahbIzCi7YJpTIB859rwYcKfG6f8GknBGwjZOtg=
 github.com/ulikunitz/xz v0.5.5/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/ulikunitz/xz v0.5.8 h1:ERv8V6GKqVi23rgu5cj9pVfVzJbOqAY2Ntl88O6c2nQ=
 github.com/ulikunitz/xz v0.5.8/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=

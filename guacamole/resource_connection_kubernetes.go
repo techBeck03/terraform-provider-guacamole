@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -483,7 +482,6 @@ func validateConnectionKubernetes(d *schema.ResourceData, client *guac.Client) d
 	stringIntparameters := []string{
 		"port",
 		"max_scrollback_size",
-		"wol_boot_wait_time",
 	}
 
 	var parameterInterface types.GuacConnectionParameters
@@ -517,17 +515,6 @@ func validateConnectionKubernetes(d *schema.ResourceData, client *guac.Client) d
 					diags = append(diags, check...)
 				}
 			}
-		}
-
-		// validate timezone
-		timezone := parameters["timezone"].(string)
-		_, err := time.LoadLocation(timezone)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Invalid timezone",
-				Detail:   fmt.Sprintf("Unable to process timezone string: %s", timezone),
-			})
 		}
 	}
 

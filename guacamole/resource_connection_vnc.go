@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -609,17 +608,6 @@ func validateConnectionVNC(d *schema.ResourceData, client *guac.Client) diag.Dia
 					diags = append(diags, check...)
 				}
 			}
-		}
-
-		// validate timezone
-		timezone := parameters["timezone"].(string)
-		_, err := time.LoadLocation(timezone)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Invalid timezone",
-				Detail:   fmt.Sprintf("Unable to process timezone string: %s", timezone),
-			})
 		}
 	}
 
