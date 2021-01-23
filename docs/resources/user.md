@@ -1,31 +1,42 @@
 ---
-page_title: "User Data Source - terraform-provider-guacamole"
+page_title: "User Resource - terraform-provider-guacamole"
 subcategory: ""
 description: |-
-  The user data source allows you to retrieve a guacamole user by username
+  The user resource allows you to configure a guacamole user
 ---
 
-# Data Source `guacamole_user`
+# Resource `guacamole_user`
 
-The user data source allows you to retrieve a guacamole user by username
+The user resource allows you to configure a guacamole user
 
 ## Example Usage
 
 ```terraform
-data "guacamole_user" "user" {
+resource "guacamole_user" "user" {
   username = "testGuacamoleUser"
+  password = "password"
+  attributes {
+    full_name = "Test User"
+    email = "testUser@example.com"
+    timezone = "America/Chicago"
+  }
+  system_permissions = ["ADMINISTER", "CREATE_USER"]
+  group_membership = ["Parent Group"]
+  connections = [
+    "12345"
+  ]
+  connection_groups = [
+    "678910"
+  ]
 }
 
 ```
 
-## Attributes Reference
-
-The following attributes are exported.
+## Argument Reference
 
 ### Base
 
-- `username` -  (string) the guacamole user username
-- `last_active` - (string) timestamp of last activity
+- `username` -  (string, Required) the guacamole user username
 - `group_membership` - (List) list of user group identifiers
 - `system_permissions` - (List) list of system permissions assigned to the user
 - `connections` - (List) list of connection identifiers assigned to the user.  This list currently does not include connection identifiers from parent user groups.
@@ -43,3 +54,10 @@ The following attributes are exported.
 - `disabled` - (bool) whether the account is disabled
 - `valid_from` - (string) account valid start date
 - `valid_until` - (string) account valid end date
+
+## Attributes Reference
+
+In addition to all the arguments above, the following attributes are exported.
+
+#### User
+- `last_active` - (string) timestamp of last activity

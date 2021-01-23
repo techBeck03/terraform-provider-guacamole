@@ -1,30 +1,39 @@
 ---
-page_title: "User Group Data Source - terraform-provider-guacamole"
+page_title: "User Group Resource - terraform-provider-guacamole"
 subcategory: ""
 description: |-
-  The user group data source allows you to retrieve a guacamole user group by identifier
+  The user group resource allows you to  a guacamole user group by identifier
 ---
 
-# Data Source `guacamole_user_group`
+# Resource `guacamole_user_group`
 
-The user group data source allows you to retrieve a guacamole user group by identifier
+The user group data source allows you to configure a guacamole user group
 
 ## Example Usage
 
 ```terraform
-data "guacamole_user_group" "group" {
+resource "guacamole_user_group" "group" {
   identifier = "testGuacamoleUserGroup"
+  system_permissions = ["ADMINISTER", "CREATE_USER"]
+  group_membership = ["Parent Group"]
+  connections = [
+    "12345"
+  ]
+  connection_groups = [
+    "678910"
+  ]
+  attributes {
+    disabled = true
+  }
 }
 
 ```
 
-## Attributes Reference
-
-The following attributes are exported.
+## Argument Reference
 
 ### Base
 
-- `identifier` -  (string) the guacamole user group identifier
+- `identifier` -  (string, Required) the guacamole user group identifier
 - `group_membership` - (List) list of user group identifiers that this group is a member of
 - `system_permissions` - (List) list of system permissions assigned to the user
 - `member_users` - (List) user identifiers that are members of this group

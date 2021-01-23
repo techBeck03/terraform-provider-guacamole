@@ -27,7 +27,7 @@ data "guacamole_connection_ssh" "ssh" {
 
 The following attributes are exported.
 
-### User
+### Base
 
 - `name` -  (string) Name of the connection
 - `path` -  (string) Used in place of identifier to find a path by "ParentName/TargetName" when the identifier is unknown
