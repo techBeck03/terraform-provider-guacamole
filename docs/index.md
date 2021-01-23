@@ -1,37 +1,37 @@
 ---
-page_title: "Provider: HashiCups"
+page_title: "Provider: Guacamole"
 subcategory: ""
 description: |-
-  Terraform provider for interacting with HashiCups API.
+  Terraform provider for interacting with Apache Guacamole web API
 ---
 
-# HashiCups Provider
+# Guacamole Provider
 
--> Visit the [Call APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorials for an interactive getting started experience.
 
-The HashiCups provider is used to interact with a fictional coffee-shop application, HashiCups. This provider is meant to serve as an educational tool to show users how:
-1. use providers to [create, read, update and delete (CRUD) resources](https://learn.hashicorp.com/tutorials/terraform/provider-use?in=terraform/providers) using Terraform.
-1. create a custom Terraform provider.
+The guacamole provider is used to interact with the [Apache Guacamole](https://guacamole.apache.org/) web API.  The provider includes the following capabilities
 
-To learn how to re-create the HashiCups provider, refer to the [Call APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorials.
+1. Data sources to read users, user groups, connections for ssh, telnet, vnc, rdp, and kubernetes, and connection groups.
+2. Resources to perform CRUD operations on users, user groups, connections for ssh, telnet, vnc, rdp, and kubernetes, and connection groups.
 
-Use the navigation to the left to read about the available resources.
+Provider versioning will align with Guacamole's release versioning starting with release `1.2`
 
 ## Example Usage
 
-Do not keep your authentication password in HCL for production environments, use Terraform environment variables.
+To use the provider you will need the Guacamole web server url, username, and password as shown in the example below
 
 ```terraform
-provider "hashicups" {
-  username = "education"
-  password = "test123"
+provider "guacamole" {
+  url      = "https://guacamole.example.com"
+  username = "guacadmin"
+  password = "guacadmin"
+  disable_tls_verification = true
 }
 ```
 
 ## Schema
 
-### Optional
-
-- **username** (String, Optional) Username to authenticate to HashiCups API
-- **password** (String, Optional) Password to authenticate to HashiCups API
-- **host** (String, Optional) HashiCups API address (defaults to `localhost:19090`)
+- **url** (String) URL of guacamole web server (defaults to env `GUACAMOLE_URL`)
+- **username** (String) Username to authenticate to guacamole (defaults to `GUACAMOLE_USERNAME`)
+- **password** (String, Optional) Password to authenticate to guacamole (defaults to `GUACAMOLE_PASSWORD`)
+- **disable_tls_verification** (Bool, Optional) Whether to disable tls verification for ssl connections (defaults to `false`)
+- **disable_cookies** (Bool, Optional) Whether to disable cookie collection in session (defaults to `false`)

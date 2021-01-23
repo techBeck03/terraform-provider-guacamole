@@ -1,24 +1,24 @@
 ---
-page_title: "Connection SSH Data Source - terraform-provider-guacamole"
+page_title: "Connection Telnet Data Source - terraform-provider-guacamole"
 subcategory: ""
 description: |-
-  The connection_ssh data source allows you to retrieve a guacamole ssh connection details by identifier or path
+  The connection_telnet data source allows you to retrieve a guacamole telnet connection details by identifier or path
 ---
 
-# Data Source `guacamole_connection_ssh`
+# Data Source `guacamole_connection_telnet`
 
 The user group data source allows you to retrieve a guacamole user group by identifier
 
 ## Example Usage
 
 ```terraform
-data "guacamole_connection_ssh" "ssh" {
+data "guacamole_connection_telnet" "telnet" {
   identifier = 1234
 }
 ```
 
 ```terraform
-data "guacamole_connection_ssh" "ssh" {
+data "guacamole_connection_telnet" "telnet" {
   path = "parentGroupName/connectionName"
 }
 ```
@@ -31,9 +31,9 @@ The following attributes are exported.
 
 - `name` -  (string) Name of the connection
 - `path` -  (string) Used in place of identifier to find a path by "ParentName/TargetName" when the identifier is unknown
-- `identifier` -  (string) Numeric identifier of the ssh connection
+- `identifier` -  (string) Numeric identifier of the telnet connection
 - `parent_identifier` -  (string) Numeric identifier of the parent connection
-- `protocol` -  (string) protocol of the connection (`ssh`).
+- `protocol` -  (string) protocol of the connection (`telnet`).
 - `active_connections` - (sting) Number of active connections for the group
 
 
@@ -54,11 +54,12 @@ The following attributes are exported.
 #### *Network*
 - `hostname` - (string) hostname
 - `port` - (string) port
-- `public_host_key` - (string) public host key
 #### *Authentication*
 - `username` - (string) username
-- `private_key` - (string) private key
-- `passphrase` - (string) passphrase (if required by key)
+- `username_regex` - (string) username regular expression
+- `password_regex` - (string) password regular expression
+- `login_success_regex` - (string) login success regular expression
+- `login_failure_regex` - (string) login failure regular expression
 #### *Display*
 - `color_scheme` - (string) color scheme: Value should be on of:
   - `black-white`
@@ -86,11 +87,6 @@ The following attributes are exported.
 #### *Clipboard*
 - `disable_copy` - (bool) disable copying from the terminal
 - `disable_paste` - (bool) disable pastiong from client
-#### *Session / Envrionment*
-- `execute_command` - (string) execute command
-- `locale` - (string) language/locale ($LANG)
-- `timezone` - (string) timezone string. Example `America/Chicago`
-- `server_keepalive_interval` - (string) server keepalive interval
 #### *Terminal Behavior*
 - `backspace` - (string) backspace key sends.  Value should be on of:
   - `127`
@@ -113,11 +109,6 @@ The following attributes are exported.
 - `recording_exclude_mouse` - (bool) exclude mouse
 - `recording_include_keys` - (bool) include key events
 - `recording_auto_create_path` - (bool) automatically create recording path
-#### *SFTP*
-- `sftp_enable` - (bool) enable SFTP
-- `sftp_root_directory` - (string) file browser root directory
-- `sftp_dsiable_file_download` - (bool) disable file download
-- `sftp_disable_file_upload` - (bool) disable file upload
 #### *Wake-on-LAN (WoL)*
 - `wol_send_packet` - (bool) send WoL packet
 - `wol_mac_address` - (string) MAC address of the remote host
