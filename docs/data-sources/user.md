@@ -5,7 +5,7 @@ description: |-
   The user data source allows you to retrieve a guacamole user by username
 ---
 
-# Data Source `user`
+# Data Source `guacamole_user`
 
 The user data source allows you to retrieve a guacamole user by username
 
@@ -24,22 +24,22 @@ The following attributes are exported.
 
 ### User
 
-- `username` -  (string) The guacamole user username
-- `last_active` - (string) Timestamp of last activity
-- `group_membership` - (List) List of user group identifiers
-- `system_permissions` - (List) List of system permissions assigned to the user
-- `connections` - List of connection identifiers assigned to the user.  This list currently does not include connection identifiers from parent user groups.
-- `connection_groups` - (List) List of connection group identifiers assigned to the user.  This list currently does not include connection group identifiers from parent user groups.
+- `username` -  (string) the guacamole user username
+- `last_active` - (string) timestamp of last activity
+- `group_membership` - (List) list of user group identifiers
+- `system_permissions` - (List) list of system permissions assigned to the user
+- `connections` - (List) list of connection identifiers assigned to the user.  This list currently does not include connection identifiers from parent user groups.
+- `connection_groups` - (List) list of connection group identifiers assigned to the user.  This list currently does not include connection group identifiers from parent user groups.
 
 ### Attributes
 
-- `organizational_role` - (string) Assigned organizational role
-- `full_name` - (string) Full name
-- `email` - (string) Email address
+- `organizational_role` - (string) assigned organizational role
+- `full_name` - (string) full name
+- `email` - (string) email address
 - `expired` - (bool) whether the account is expired
-- `timezone` - (string) The timezone string ("America/Chicago")
-- `access_window_start` - (string) Access window start time
-- `access_window_end` - (string) Access window end time
+- `timezone` - (string) the timezone string ("America/Chicago")
+- `access_window_start` - (string) access window start time
+- `access_window_end` - (string) access window end time
 - `disabled` - (bool) whether the account is disabled
-- `valid_from` - (string) Account valid start date
-- `valid_until` - (string) Account valid end date
+- `valid_from` - (string) account valid start date
+- `valid_until` - (string) account valid end date
