@@ -64,6 +64,22 @@ func dataSourceUserGroup() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"connections": {
+				Type:        schema.TypeSet,
+				Description: "Connections identifiers a user has permission to read",
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"connection_groups": {
+				Type:        schema.TypeSet,
+				Description: "Connection Group identifiers a user has permission to read",
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -125,6 +141,22 @@ func dataSourceUserGroupRead(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	d.Set("system_permissions", permissions.SystemPermissions)
+
+	// Get connections
+	var connections []string
+	for connection := range permissions.ConnectionPermissions {
+		connections = append(connections, connection)
+	}
+
+	d.Set("connections", connections)
+
+	// Get connection groups
+	var connectionGroups []string
+	for group := range permissions.ConnectionGroupPermissions {
+		connectionGroups = append(connectionGroups, group)
+	}
+
+	d.Set("connection_groups", connectionGroups)
 
 	d.SetId(identifier)
 

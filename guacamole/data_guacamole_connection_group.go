@@ -68,6 +68,40 @@ func dataSourceConnectionGroup() *schema.Resource {
 					},
 				},
 			},
+			"member_connection_groups": {
+				Type:        schema.TypeList,
+				Description: "Member connection groups of a guacamole connection group",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"identifier": {
+							Type:        schema.TypeString,
+							Description: "Identifier of guacamole connection group",
+							Optional:    true,
+						},
+						"parent_identifier": {
+							Type:        schema.TypeString,
+							Description: "Parent Identifier of guacamole connection group",
+							Optional:    true,
+						},
+						"name": {
+							Type:        schema.TypeString,
+							Description: "Identifier of guacamole connection group",
+							Computed:    true,
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Description: "Identifier of guacamole connection group",
+							Computed:    true,
+						},
+						"active_connections": {
+							Type:        schema.TypeInt,
+							Description: "Identifier of guacamole connection group",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			"member_connections": {
 				Type:        schema.TypeList,
 				Description: "Member connections of a guacamole connection group",
@@ -166,7 +200,7 @@ func dataSourceConnectionGroupRead(ctx context.Context, d *schema.ResourceData, 
 		})
 	}
 
-	d.Set("member_groups", memberGroups)
+	d.Set("member_connection_groups", memberGroups)
 
 	var memberConnections []interface{}
 	for _, connection := range group.ChildConnections {
