@@ -7,7 +7,7 @@ description: |-
 
 # Data Source `guacamole_connection_ssh`
 
-The user group data source allows you to retrieve a guacamole user group by identifier
+The connection_ssh data source allows you to retrieve a guacamole ssh connection details by identifier or path
 
 ## Example Usage
 

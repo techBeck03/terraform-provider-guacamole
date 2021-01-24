@@ -1,41 +1,50 @@
 ---
-page_title: "Connection RDP Data Source - terraform-provider-guacamole"
+page_title: "Connection RDP Resource - terraform-provider-guacamole"
 subcategory: ""
 description: |-
-  The connection_rdp data source allows you to retrieve a guacamole rdp connection details by identifier or path
+  The connection_rdp resource allows you to configure a guacamole rdp connection
 ---
 
 # Data Source `guacamole_connection_rdp`
 
-The connection_rdp data source allows you to retrieve a guacamole rdp connection details by identifier or path
+The connection_rdp resource allows you to configure a guacamole rdp connection
 
 ## Example Usage
 
 ```terraform
-data "guacamole_connection_rdp" "rdp" {
-  identifier = 1234
+resource "guacamole_connection_rdp" "rdp" {
+  name = "Test RDP Connection"
+  parent_identifier = "ROOT"
+  guacamole_connection_group.test_group.identifier
+  attributes {
+    guacd_hostname = "guac.test.com"
+    guacd_encryption = "ssl"
+    failover_only = true
+  }
+  parameters {
+    hostname = "testing.example.com"
+    username = "$${GUAC_USERNAME}"
+    password ="$${GUAC_PASSWORD}"
+    domain = "domain.example.com"
+    port = 3389
+    timezone = "America/Chicago"
+    console_audio = true
+    disable_audio = true
+    enable_audio_input = true
+    enable_wallpaper = true
+    resize_method = "display-update"
+    color_depth = 24
+    sftp_enable = true
+  }
 }
 ```
 
-```terraform
-data "guacamole_connection_rdp" "rdp" {
-  path = "parentGroupName/connectionName"
-}
-```
-
-## Attributes Reference
-
-The following attributes are exported.
+## Argument Reference
 
 ### Base
 
-- `name` -  (string) Name of the connection
-- `path` -  (string) Used in place of identifier to find a path by "ParentName/TargetName" when the identifier is unknown
-- `identifier` -  (string) Numeric identifier of the rdp connection
-- `parent_identifier` -  (string) Numeric identifier of the parent connection
-- `protocol` -  (string) protocol of the connection (`rdp`).
-- `active_connections` - (sting) Number of active connections for the group
-
+- `name` -  (string, Required) Name of the connection
+- `parent_identifier` -  (string, Required) Numeric identifier of the parent connection
 
 ### Attributes
 
@@ -167,3 +176,12 @@ The following attributes are exported.
 - `wol_mac_address` - (string) MAC address of the remote host
 - `wol_broadcast_address` - (string) broadcast address for WoL packet
 - `wol_boot_wait_time` - (string) host boot wait time
+
+## Attributes Reference
+
+In addition to all the arguments above, the following attributes are exported.
+
+#### Base
+- `identifier` -  (string) Numeric identifier of the rdp connection
+- `protocol` -  (string) protocol of the connection (`rdp`)
+- `active_connections` - (sting) Number of active connections for the group

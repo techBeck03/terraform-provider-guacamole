@@ -59,5 +59,5 @@ resource "guacamole_user" "user" {
 
 In addition to all the arguments above, the following attributes are exported.
 
-#### User
+#### Base
 - `last_active` - (string) timestamp of last activity

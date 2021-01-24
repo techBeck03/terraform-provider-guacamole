@@ -1,40 +1,40 @@
 ---
-page_title: "Connection VNC Data Source - terraform-provider-guacamole"
+page_title: "Connection VNC Resource - terraform-provider-guacamole"
 subcategory: ""
 description: |-
-  The connection_vnc data source allows you to retrieve a guacamole vnc connection details by identifier or path
+  The connection_vnc resource allows you to configure a guacamole vnc connection
 ---
 
-# Data Source `guacamole_connection_vnc`
+# Resource `guacamole_connection_vnc`
 
-The connection_vnc data source allows you to retrieve a guacamole vnc connection details by identifier or path
+The connection_vnc resource allows you to configure a guacamole vnc connection
 
 ## Example Usage
 
 ```terraform
-data "guacamole_connection_vnc" "vnc" {
-  identifier = 1234
+resource "guacamole_connection_vnc" "vnc" {
+  name = "Test VNC Connection"
+  parent_identifier = "ROOT"
+  attributes {
+    guacd_hostname = "guac.test.com"
+    guacd_encryption = "ssl"
+  }
+  parameters {
+    hostname = "testing.example.com"
+    username = "admin"
+    password = "password123"
+    swap_red_blue = true
+    color_depth = 24
+  }
 }
 ```
 
-```terraform
-data "guacamole_connection_vnc" "vnc" {
-  path = "parentGroupName/connectionName"
-}
-```
-
-## Attributes Reference
-
-The following attributes are exported.
+## Argument Reference
 
 ### Base
 
-- `name` -  (string) Name of the connection
-- `path` -  (string) Used in place of identifier to find a path by "ParentName/TargetName" when the identifier is unknown
-- `identifier` -  (string) Numeric identifier of the vnc connection
-- `parent_identifier` -  (string) Numeric identifier of the parent connection
-- `protocol` -  (string) protocol of the connection (`vnc`).
-- `active_connections` - (sting) Number of active connections for the group
+- `name` -  (string, Required) Name of the connection
+- `parent_identifier` -  (string, Required) Numeric identifier of the parent connection
 
 
 ### Attributes
@@ -102,3 +102,8 @@ The following attributes are exported.
 - `wol_mac_address` - (string) MAC address of the remote host
 - `wol_broadcast_address` - (string) broadcast address for WoL packet
 - `wol_boot_wait_time` - (string) host boot wait time
+
+#### Base
+- `identifier` -  (string) Numeric identifier of the vnc connection
+- `protocol` -  (string) protocol of the connection (`vnc`)
+- `active_connections` - (sting) Number of active connections for the group

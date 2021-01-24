@@ -13,12 +13,6 @@ The user group data source allows you to retrieve a guacamole user group by iden
 
 ```terraform
 resource "guacamole_connection_group" "group" {
-  
-}
-```
-
-```terraform
-data "guacamole_connection_group" "group" {
   parent_identifier = "ROOT"
   name = "Testing Group"
   type = "organizational"
@@ -48,6 +42,8 @@ data "guacamole_connection_group" "group" {
 
 ## Attributes Reference
 
-#### User
+In addition to all the arguments above, the following attributes are exported.
+
+#### Base
 - `identifier` -  (string) numeric identifier of the connection group
 - `active_connections` - (sting) number of active connections for the group

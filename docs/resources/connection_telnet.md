@@ -1,41 +1,43 @@
 ---
-page_title: "Connection Telnet Data Source - terraform-provider-guacamole"
+page_title: "Connection Telnet Resource - terraform-provider-guacamole"
 subcategory: ""
 description: |-
-  The connection_telnet data source allows you to retrieve a guacamole telnet connection details by identifier or path
+  The connection_telnet resource allows you to configure a guacamole telnet connection
 ---
 
-# Data Source `guacamole_connection_telnet`
+# Resource `guacamole_connection_telnet`
 
-The connection_telnet data source allows you to retrieve a guacamole telnet connection details by identifier or path
+The connection_telnet resource allows you to configure a guacamole telnet connection
 
 ## Example Usage
 
 ```terraform
-data "guacamole_connection_telnet" "telnet" {
-  identifier = 1234
+resource "guacamole_connection_telnet" "telnet" {
+  name = "Test Telnet Connection"
+  parent_identifier = "ROOT"
+  attributes {
+    guacd_hostname = "guac.test.com"
+    guacd_encryption = "ssl"
+  }
+  parameters {
+    hostname = "testing.example.com"
+    username = "admin"
+    password = "password123"
+    username_regex = "[Uu]sername:"
+    port = 22
+    disable_copy = true
+    color_scheme = "green-black"
+    font_size = 48
+  }
 }
 ```
 
-```terraform
-data "guacamole_connection_telnet" "telnet" {
-  path = "parentGroupName/connectionName"
-}
-```
-
-## Attributes Reference
-
-The following attributes are exported.
+## Argument Reference
 
 ### Base
 
-- `name` -  (string) Name of the connection
-- `path` -  (string) Used in place of identifier to find a path by "ParentName/TargetName" when the identifier is unknown
-- `identifier` -  (string) Numeric identifier of the telnet connection
-- `parent_identifier` -  (string) Numeric identifier of the parent connection
-- `protocol` -  (string) protocol of the connection (`telnet`).
-- `active_connections` - (sting) Number of active connections for the group
-
+- `name` -  (string, Required) Name of the connection
+- `parent_identifier` -  (string, Required) Numeric identifier of the parent connection
 
 ### Attributes
 
@@ -114,3 +116,12 @@ The following attributes are exported.
 - `wol_mac_address` - (string) MAC address of the remote host
 - `wol_broadcast_address` - (string) broadcast address for WoL packet
 - `wol_boot_wait_time` - (string) host boot wait time
+
+## Attributes Reference
+
+In addition to all the arguments above, the following attributes are exported.
+
+#### Base
+- `identifier` -  (string) Numeric identifier of the telnet connection
+- `protocol` -  (string) protocol of the connection (`telnet`)
+- `active_connections` - (sting) Number of active connections for the group

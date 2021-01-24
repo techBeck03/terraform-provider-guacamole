@@ -1,41 +1,51 @@
 ---
-page_title: "Connection Kubernetes Data Source - terraform-provider-guacamole"
+page_title: "Connection Kubernetes Resource - terraform-provider-guacamole"
 subcategory: ""
 description: |-
-  The connection_kubernetes data source allows you to retrieve a guacamole kubernetes connection details by identifier or path
+  The connection_kubernetes resource allows you to configure a guacamole kubernetes connection
 ---
 
-# Data Source `guacamole_connection_kubernetes`
+# Resource `guacamole_connection_kubernetes`
 
-The connection_kubernetes data source allows you to retrieve a guacamole kubernetes connection details by identifier or path
+The connection_kubernetes resource allows you to configure a guacamole kubernetes connection
 
 ## Example Usage
 
 ```terraform
-data "guacamole_connection_kubernetes" "kubernetes" {
-  identifier = 1234
+resource "guacamole_connection_kubernetes" "kubernetes" {
+  name = "Test K8s Connection"
+  parent_identifier = "ROOT"
+  attributes {
+    guacd_hostname = "guac.test.com"
+    guacd_encryption = "ssl"
+  }
+  parameters {
+    hostname = "https://kube.example.com"
+    port = 6443
+    use_ssl = true
+    ignore_cert = true
+    namespace = "default"
+    pod = "testPod"
+    container = "user-container"
+    client_cert = <<-EOT
+    PLACE CLIENT CERT CONTENTS HERE
+    EOT
+    client_key = <<-EOT
+    PLACE CLIENT Key CONTENTS HERE
+    EOT
+    color_scheme = "green-black"
+    font_size = 48
+  }
 }
 ```
 
-```terraform
-data "guacamole_connection_kubernetes" "kubernetes" {
-  path = "parentGroupName/connectionName"
-}
-```
 
-## Attributes Reference
-
-The following attributes are exported.
+## Argument Reference
 
 ### Base
 
-- `name` -  (string) Name of the connection
-- `path` -  (string) Used in place of identifier to find a path by "ParentName/TargetName" when the identifier is unknown
-- `identifier` -  (string) Numeric identifier of the kubernetes connection
-- `parent_identifier` -  (string) Numeric identifier of the parent connection
-- `protocol` -  (string) protocol of the connection (`kubernetes`).
-- `active_connections` - (sting) Number of active connections for the group
-
+- `name` -  (string, Required) Name of the connection
+- `parent_identifier` -  (string, Required) Numeric identifier of the parent connection
 
 ### Attributes
 
@@ -101,3 +111,12 @@ The following attributes are exported.
 - `recording_exclude_mouse` - (bool) exclude mouse
 - `recording_include_keys` - (bool) include key events
 - `recording_auto_create_path` - (bool) automatically create recording path
+
+## Attributes Reference
+
+In addition to all the arguments above, the following attributes are exported.
+
+#### Base
+- `identifier` -  (string) Numeric identifier of the kubernetes connection
+- `protocol` -  (string) protocol of the connection (`kubernetes`)
+- `active_connections` - (sting) Number of active connections for the group

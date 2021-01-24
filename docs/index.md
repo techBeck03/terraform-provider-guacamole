@@ -35,3 +35,21 @@ provider "guacamole" {
 - **password** (String, Optional) Password to authenticate to guacamole (defaults to `GUACAMOLE_PASSWORD`)
 - **disable_tls_verification** (Bool, Optional) Whether to disable tls verification for ssl connections (defaults to `false`)
 - **disable_cookies** (Bool, Optional) Whether to disable cookie collection in session (defaults to `false`)
+
+## Using Guacamole Parameter Tokens
+
+Apache Guacamole allows users to use system generated [parmater tokens](https://guacamole.apache.org/doc/gug/configuring-guacamole.html#parameter-tokens) within connection definitions.  The parameter token syntax is the same syntax used for HCL string interpolation of variables and must therefore be escaped.
+
+Below is an example of how to use the `${GUAC_USERNAME}` and `${GUAC_PASSWORD}` parameter tokens
+
+```terraform
+resource "guacamole_connection_ssh" "ssh" {
+  name = "sshConnection"
+  parent_identifier = "ROOT"
+  parameters {
+    hostname = "testing.example.com"
+    username = "$${GUAC_USERNAME}"
+    password ="$${GUAC_PASSWORD}"
+  }
+}
+```
