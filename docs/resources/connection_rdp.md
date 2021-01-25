@@ -5,7 +5,7 @@ description: |-
   The connection_rdp resource allows you to configure a guacamole rdp connection
 ---
 
-# Data Source `guacamole_connection_rdp`
+# Resource `guacamole_connection_rdp`
 
 The connection_rdp resource allows you to configure a guacamole rdp connection
 

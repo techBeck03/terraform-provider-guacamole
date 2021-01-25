@@ -30,9 +30,9 @@ provider "guacamole" {
 
 ## Schema
 
-- **url** (String) URL of guacamole web server (defaults to env `GUACAMOLE_URL`)
-- **username** (String) Username to authenticate to guacamole (defaults to `GUACAMOLE_USERNAME`)
-- **password** (String, Optional) Password to authenticate to guacamole (defaults to `GUACAMOLE_PASSWORD`)
+- **url** (String) URL of guacamole web server (defaults to environment variable `GUACAMOLE_URL`)
+- **username** (String) Username to authenticate to guacamole (defaults to environment variable `GUACAMOLE_USERNAME`)
+- **password** (String) Password to authenticate to guacamole (defaults to environment variable `GUACAMOLE_PASSWORD`)
 - **disable_tls_verification** (Bool, Optional) Whether to disable tls verification for ssl connections (defaults to `false`)
 - **disable_cookies** (Bool, Optional) Whether to disable cookie collection in session (defaults to `false`)
 
