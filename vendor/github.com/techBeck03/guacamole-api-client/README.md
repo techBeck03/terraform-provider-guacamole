@@ -2,7 +2,9 @@
 
 This go-based client is intended to be used as an sdk for the [Apache Guacamole](https://guacamole.apache.org/) web API.  To my knowledge this API is undocumented and could therefore change from release to release.
 
-The intent of this sdk is to be used by a Terraform provider that is still a work in progress.  Once completed I will link the community provider here.
+The primary intent of this sdk is to be used with the following Terraform provider:
+
+https://registry.terraform.io/providers/techBeck03/guacamole/latest
 
 Be sure to checkout the release that matches the version of Guacamole you are running.  The developement of this sdk started with the Guacamole 1.2.0 release so no prior releases are currently supported.
 

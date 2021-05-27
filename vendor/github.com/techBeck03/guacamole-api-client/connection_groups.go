@@ -3,6 +3,7 @@ package guacamole
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/techBeck03/guacamole-api-client/types"
@@ -74,8 +75,10 @@ func (c *Client) CreateConnectionGroup(group *types.GuacConnectionGroup) error {
 // ReadConnectionGroup gets a connection group by identifier
 func (c *Client) ReadConnectionGroup(identifier string) (types.GuacConnectionGroup, error) {
 	var ret types.GuacConnectionGroup
-
-	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionGroupsBasePath, identifier), nil)
+	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionGroupsBasePath, url.QueryEscape(identifier)), nil)
+	if err != nil {
+		return ret, err
+	}
 	err = c.Call(request, &ret)
 	if err != nil {
 		return ret, err
@@ -149,7 +152,7 @@ func (c *Client) ReadConnectionGroupByPath(path string) (types.GuacConnectionGro
 
 // UpdateConnectionGroup updates a connection group by identifier
 func (c *Client) UpdateConnectionGroup(group *types.GuacConnectionGroup) error {
-	request, err := c.CreateJSONRequest(http.MethodPut, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionGroupsBasePath, group.Identifier), group)
+	request, err := c.CreateJSONRequest(http.MethodPut, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionGroupsBasePath, url.QueryEscape(group.Identifier)), group)
 
 	if err != nil {
 		return err
@@ -164,7 +167,7 @@ func (c *Client) UpdateConnectionGroup(group *types.GuacConnectionGroup) error {
 
 // DeleteConnectionGroup deletes a connection group by identifier
 func (c *Client) DeleteConnectionGroup(identifier string) error {
-	request, err := c.CreateJSONRequest(http.MethodDelete, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionGroupsBasePath, identifier), nil)
+	request, err := c.CreateJSONRequest(http.MethodDelete, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionGroupsBasePath, url.QueryEscape(identifier)), nil)
 
 	if err != nil {
 		return err

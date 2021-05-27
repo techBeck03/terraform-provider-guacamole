@@ -3,6 +3,7 @@ package guacamole
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/techBeck03/guacamole-api-client/types"
@@ -33,7 +34,7 @@ func (c *Client) ReadConnection(identifier string) (types.GuacConnection, error)
 	var retParams types.GuacConnectionParameters
 
 	// Get connection base details
-	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionsBasePath, identifier), nil)
+	request, err := c.CreateJSONRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionsBasePath, url.QueryEscape(identifier)), nil)
 
 	if err != nil {
 		return ret, err
@@ -115,7 +116,7 @@ func (c *Client) ReadConnectionByPath(path string) (types.GuacConnection, error)
 
 // UpdateConnection updates a connection by identifier
 func (c *Client) UpdateConnection(connection *types.GuacConnection) error {
-	request, err := c.CreateJSONRequest(http.MethodPut, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionsBasePath, connection.Identifier), connection)
+	request, err := c.CreateJSONRequest(http.MethodPut, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionsBasePath, url.QueryEscape(connection.Identifier)), connection)
 
 	if err != nil {
 		return err
@@ -130,7 +131,7 @@ func (c *Client) UpdateConnection(connection *types.GuacConnection) error {
 
 // DeleteConnection deletes a connection by identifier
 func (c *Client) DeleteConnection(identifier string) error {
-	request, err := c.CreateJSONRequest(http.MethodDelete, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionsBasePath, identifier), nil)
+	request, err := c.CreateJSONRequest(http.MethodDelete, fmt.Sprintf("%s/%s/%s", c.baseURL, connectionsBasePath, url.QueryEscape(identifier)), nil)
 
 	if err != nil {
 		return err
