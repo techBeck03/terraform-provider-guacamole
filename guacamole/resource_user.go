@@ -26,6 +26,12 @@ func guacamoleUser() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
+			"password": {
+				Type:        schema.TypeString,
+				Description: "Password of guacamole user",
+				Optional:    true,
+				Sensitive:   true,
+			},
 			"last_active": {
 				Type:        schema.TypeString,
 				Description: "Epoch time string of last user activity",
@@ -314,7 +320,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*guac.Client)
 
-	if d.HasChanges("username", "last_active", "attributes") {
+	if d.HasChanges("username", "password", "last_active", "attributes") {
 		check := validateUser(d)
 		if check.HasError() {
 			return check
@@ -503,6 +509,7 @@ func convertResourceDataToGuacUser(d *schema.ResourceData) (types.GuacUser, erro
 	var user types.GuacUser
 
 	user.Username = d.Get("username").(string)
+	user.Password = d.Get("password").(string)
 
 	attributeList := d.Get("attributes").([]interface{})
 
@@ -527,6 +534,7 @@ func convertResourceDataToGuacUser(d *schema.ResourceData) (types.GuacUser, erro
 
 func convertGuacUserToResourceData(d *schema.ResourceData, user *types.GuacUser) error {
 	d.Set("username", user.Username)
+	d.Set("password", user.Password)
 	d.Set("last_active", strconv.Itoa(user.LastActive))
 
 	attributes := map[string]interface{}{
