@@ -15,7 +15,6 @@ The connection_rdp resource allows you to configure a guacamole rdp connection
 resource "guacamole_connection_rdp" "rdp" {
   name = "Test RDP Connection"
   parent_identifier = "ROOT"
-  guacamole_connection_group.test_group.identifier
   attributes {
     guacd_hostname = "guac.test.com"
     guacd_encryption = "ssl"
