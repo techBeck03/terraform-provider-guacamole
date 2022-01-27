@@ -53,7 +53,7 @@ resource "guacamole_connection_kubernetes" "kubernetes" {
 - `max_connections_per_user` - (string) max allowed connections per user
 - `weigth` - (string) connectivity weight
 - `failover_only` - (bool) used for failover only
-- `guacd_hostnmae` - (string) guacamole proxy hostname
+- `guacd_hostname` - (string) guacamole proxy hostname
 - `guacd_port` - (string) guacamole proxy port
 - `guacd_encryption` - (string) guacamole proxy encryption type:  Value should be on of:
   - `none`
