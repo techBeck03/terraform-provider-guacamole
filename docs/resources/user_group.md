@@ -44,3 +44,10 @@ resource "guacamole_user_group" "group" {
 
 - `disabled` - (bool) whether the user group is disabled
 
+## Import
+
+User group can be imported using the `resource id`, e.g.
+
+```shell
+terraform import guacamole_user_group.group group_name
+```

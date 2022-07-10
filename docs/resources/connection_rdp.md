@@ -184,3 +184,11 @@ In addition to all the arguments above, the following attributes are exported.
 - `identifier` -  (string) Numeric identifier of the rdp connection
 - `protocol` -  (string) protocol of the connection (`rdp`)
 - `active_connections` - (sting) Number of active connections for the group
+
+## Import
+
+RDP connection can be imported using the `resource id`, e.g.
+
+```shell
+terraform import guacamole_connection_rdp.rdp 2
+```

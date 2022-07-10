@@ -47,3 +47,11 @@ In addition to all the arguments above, the following attributes are exported.
 #### Base
 - `identifier` -  (string) numeric identifier of the connection group
 - `active_connections` - (sting) number of active connections for the group
+
+## Import
+
+Connection group can be imported using the `resource id`, e.g.
+
+```shell
+terraform import guacamole_connection_group.group 1
+```
