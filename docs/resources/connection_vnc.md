@@ -56,6 +56,7 @@ resource "guacamole_connection_vnc" "vnc" {
 - `port` - (string) port
 #### *Authentication*
 - `username` - (string) username
+- `password` - (string) password
 #### *Display*
 - `readonly` - (bool) display is read-only
 - `swap_red_blue` - (bool) swap red/blue components

@@ -64,13 +64,14 @@ resource "guacamole_connection_kubernetes" "kubernetes" {
 #### *Network*
 - `hostname` - (string) hostname
 - `port` - (string) port
-- `public_host_key` - (string) public host key
+- `use_ssl` - (string) Use SSL
+- `ignore_cert` - (string) Ignore cert errors
 #### Container
 - `namespace` - (string)
 - `pod` - (string)
 - `container` - (string)
 #### *Authentication*
-- `client_certificate` - (string) client certificate
+- `client_cert` - (string) client certificate
 - `client_key` - (string) client key
 #### *Display*
 - `color_scheme` - (string) color scheme: Value should be on of:

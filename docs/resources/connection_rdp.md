@@ -64,6 +64,7 @@ resource "guacamole_connection_rdp" "rdp" {
 - `port` - (string) port
 #### *Authentication*
 - `username` - (string) username
+- `password` - (string) password
 - `domain` - (string) active directory domain name
 - `security_mode` - (string) security mode.  Value should be on of:
   - `any`
