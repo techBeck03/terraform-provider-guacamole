@@ -48,7 +48,7 @@ resource "guacamole_connection_ssh" "ssh" {
 
 - `max_connections` - (string) max allowed connections
 - `max_connections_per_user` - (string) max allowed connections per user
-- `weigth` - (string) connectivity weight
+- `weight` - (string) connectivity weight
 - `failover_only` - (bool) used for failover only
 - `guacd_hostname` - (string) guacamole proxy hostname
 - `guacd_port` - (string) guacamole proxy port
@@ -97,7 +97,7 @@ resource "guacamole_connection_ssh" "ssh" {
 - `execute_command` - (string) execute command
 - `locale` - (string) language/locale ($LANG)
 - `timezone` - (string) timezone string. Example `America/Chicago`
-- `server_keepalive_interval` - (string) server keepalive interval
+- `server_keepalive` - (string) server keepalive interval
 #### *Terminal Behavior*
 - `backspace` - (string) backspace key sends.  Value should be on of:
   - `127`
@@ -123,7 +123,7 @@ resource "guacamole_connection_ssh" "ssh" {
 #### *SFTP*
 - `sftp_enable` - (bool) enable SFTP
 - `sftp_root_directory` - (string) file browser root directory
-- `sftp_dsiable_file_download` - (bool) disable file download
+- `sftp_disable_file_download` - (bool) disable file download
 - `sftp_disable_file_upload` - (bool) disable file upload
 #### *Wake-on-LAN (WoL)*
 - `wol_send_packet` - (bool) send WoL packet
