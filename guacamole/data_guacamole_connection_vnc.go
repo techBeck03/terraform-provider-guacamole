@@ -91,7 +91,7 @@ func dataSourceConnectionVNC() *schema.Resource {
 			"parameters": {
 				Type:        schema.TypeList,
 				Description: "Guacamole connection parameters",
-				Required:    true,
+				Optional:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -109,7 +109,7 @@ func dataSourceConnectionVNC() *schema.Resource {
 						"username": {
 							Type:        schema.TypeString,
 							Description: "Username for vnc connection",
-							Required:    true,
+							Computed:    true,
 						},
 						"password": {
 							Type:        schema.TypeString,
