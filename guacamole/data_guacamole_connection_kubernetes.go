@@ -91,7 +91,7 @@ func dataSourceConnectionKubernetes() *schema.Resource {
 			"parameters": {
 				Type:        schema.TypeList,
 				Description: "Guacamole connection parameters",
-				Required:    true,
+				Optional:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

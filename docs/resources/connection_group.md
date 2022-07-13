@@ -31,8 +31,6 @@ resource "guacamole_connection_group" "group" {
 - `type` -  (string) type of connection group.  Value should be on of:
   - `ORGANIZATIONAL`
   - `BALANCING`
-- `member_connections` - (List) list of connection identifiers whose parent is this connection group
-- `member_connection_groups` - (List) list of connection group identifiers whose parent is this user group
 
 ### Attributes
 
@@ -47,6 +45,8 @@ In addition to all the arguments above, the following attributes are exported.
 #### Base
 - `identifier` -  (string) numeric identifier of the connection group
 - `active_connections` - (sting) number of active connections for the group
+- `member_connections` - (List) list of connection identifiers whose parent is this connection group
+- `member_connection_groups` - (List) list of connection group identifiers whose parent is this user group
 
 ## Import
 

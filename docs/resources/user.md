@@ -37,6 +37,7 @@ resource "guacamole_user" "user" {
 ### Base
 
 - `username` -  (string, Required) the guacamole user username
+- `password` -  (string) the guacamole user password
 - `group_membership` - (List) list of user group identifiers
 - `system_permissions` - (List) list of system permissions assigned to the user
 - `connections` - (List) list of connection identifiers assigned to the user.  This list currently does not include connection identifiers from parent user groups.
