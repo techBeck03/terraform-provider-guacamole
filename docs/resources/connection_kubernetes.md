@@ -51,7 +51,7 @@ resource "guacamole_connection_kubernetes" "kubernetes" {
 
 - `max_connections` - (string) max allowed connections
 - `max_connections_per_user` - (string) max allowed connections per user
-- `weigth` - (string) connectivity weight
+- `weight` - (string) connectivity weight
 - `failover_only` - (bool) used for failover only
 - `guacd_hostname` - (string) guacamole proxy hostname
 - `guacd_port` - (string) guacamole proxy port
@@ -64,13 +64,14 @@ resource "guacamole_connection_kubernetes" "kubernetes" {
 #### *Network*
 - `hostname` - (string) hostname
 - `port` - (string) port
-- `public_host_key` - (string) public host key
+- `use_ssl` - (string) Use SSL
+- `ignore_cert` - (string) Ignore cert errors
 #### Container
 - `namespace` - (string)
 - `pod` - (string)
 - `container` - (string)
 #### *Authentication*
-- `client_certificate` - (string) client certificate
+- `client_cert` - (string) client certificate
 - `client_key` - (string) client key
 #### *Display*
 - `color_scheme` - (string) color scheme: Value should be on of:

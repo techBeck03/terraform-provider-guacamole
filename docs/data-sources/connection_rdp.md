@@ -41,7 +41,7 @@ The following attributes are exported.
 
 - `max_connections` - (string) max allowed connections
 - `max_connections_per_user` - (string) max allowed connections per user
-- `weigth` - (string) connectivity weight
+- `weight` - (string) connectivity weight
 - `failover_only` - (bool) used for failover only
 - `guacd_hostname` - (string) guacamole proxy hostname
 - `guacd_port` - (string) guacamole proxy port
@@ -118,7 +118,7 @@ The following attributes are exported.
 - `enable_drive` - (bool) enable drive
 - `drive_name` - (string) drive name
 - `disable_file_download` - (bool) disable file download
-- `diable_file_upload` - (bool) disable file upload
+- `disable_file_upload` - (bool) disable file upload
 - `drive_path` - (string) drive path
 - `create_drive_path` - (bool) automatically create drive
 - `static_channels` - (string) static channel names
@@ -130,7 +130,7 @@ The following attributes are exported.
 - `enable_desktop_composition` - (bool) enable desktop composition (Aero)
 - `enable_menu_animations` - (bool) enable menu animations
 - `disable_bitmap_caching` - (bool) disable bitmap caching
-- `disable_offscreen_caching` - (bool) diable off-screen caching
+- `disable_offscreen_caching` - (bool) disable off-screen caching
 - `disable_glyph_caching` - (bool) disable glyph caching
 #### *RemoteApp*
 - `remote_app` - (string) program
@@ -160,7 +160,7 @@ The following attributes are exported.
 - `sftp_root_directory` - (string) file browser root directory
 - `sftp_upload_directory` - (string) default upload directory
 - `sftp_keepalive_interval` - (string) SFTP keepalive interval
-- `sftp_dsiable_file_download` - (bool) disable file download
+- `sftp_disable_file_download` - (bool) disable file download
 - `sftp_disable_file_upload` - (bool) disable file upload
 #### *Wake-on-LAN (WOL)*
 - `wol_send_packet` - (bool) send WoL packet
