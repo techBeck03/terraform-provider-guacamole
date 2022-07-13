@@ -108,3 +108,11 @@ resource "guacamole_connection_vnc" "vnc" {
 - `identifier` -  (string) Numeric identifier of the vnc connection
 - `protocol` -  (string) protocol of the connection (`vnc`)
 - `active_connections` - (sting) Number of active connections for the group
+
+## Import
+
+VNC connection can be imported using the `resource id`, e.g.
+
+```shell
+terraform import guacamole_connection_vnc.vnc 2
+```

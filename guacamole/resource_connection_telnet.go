@@ -285,6 +285,9 @@ func guacamoleConnectionTelnet() *schema.Resource {
 				},
 			},
 		},
+                Importer: &schema.ResourceImporter{
+                        StateContext: schema.ImportStatePassthroughContext,
+                },
 	}
 }
 

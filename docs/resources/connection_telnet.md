@@ -126,3 +126,11 @@ In addition to all the arguments above, the following attributes are exported.
 - `identifier` -  (string) Numeric identifier of the telnet connection
 - `protocol` -  (string) protocol of the connection (`telnet`)
 - `active_connections` - (sting) Number of active connections for the group
+
+## Import
+
+Telnet connection can be imported using the `resource id`, e.g.
+
+```shell
+terraform import guacamole_connection_telnet.telnet 4
+```

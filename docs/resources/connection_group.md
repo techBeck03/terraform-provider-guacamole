@@ -47,3 +47,11 @@ In addition to all the arguments above, the following attributes are exported.
 - `active_connections` - (sting) number of active connections for the group
 - `member_connections` - (List) list of connection identifiers whose parent is this connection group
 - `member_connection_groups` - (List) list of connection group identifiers whose parent is this user group
+
+## Import
+
+Connection group can be imported using the `resource id`, e.g.
+
+```shell
+terraform import guacamole_connection_group.group 1
+```

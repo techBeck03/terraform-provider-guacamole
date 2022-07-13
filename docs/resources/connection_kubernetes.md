@@ -121,3 +121,11 @@ In addition to all the arguments above, the following attributes are exported.
 - `identifier` -  (string) Numeric identifier of the kubernetes connection
 - `protocol` -  (string) protocol of the connection (`kubernetes`)
 - `active_connections` - (sting) Number of active connections for the group
+
+## Import
+
+Kubernetes connection can be imported using the `resource id`, e.g.
+
+```shell
+terraform import guacamole_connection_kubernetes.kubernetes 1
+```

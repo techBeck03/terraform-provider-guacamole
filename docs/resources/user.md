@@ -62,3 +62,11 @@ In addition to all the arguments above, the following attributes are exported.
 
 #### Base
 - `last_active` - (string) timestamp of last activity
+
+## Import
+
+User can be imported using the `resource id`, e.g.
+
+```shell
+terraform import guacamole_user.user user_name
+```
