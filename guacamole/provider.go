@@ -2,6 +2,7 @@ package guacamole
 
 import (
 	"context"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -66,7 +67,7 @@ func Provider() *schema.Provider {
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	url := d.Get("url").(string)
+	url := strings.TrimRight(d.Get("url").(string), "/")
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 	disableTLS := d.Get("disable_tls_verification").(bool)
