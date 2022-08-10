@@ -99,7 +99,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Unable to create guacamole client",
-			Detail:   "Unable to authenticate user for guacamole client",
+			Detail:   err.Error(),
 		})
 
 		return nil, diags
