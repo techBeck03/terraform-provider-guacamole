@@ -28,11 +28,41 @@ provider "guacamole" {
 }
 ```
 
+Alternatively, if you are using dual factor authentication, you will need the Guacamole web server url, token, and data_source as shown in the example below.  One way to retrieve the token is to login via the UI using DFA then open the developer console of your browser.  Inspect any Fetch/XHR operation and you'll find the token in the request headers under `guacamole-token` (this assumes you are using guacamole `1.4` or later)
+
+```terraform
+provider "guacamole" {
+  url         = "https://guacamole.example.com"
+  token       = "8675309"
+  data_source = "mysql"
+  disable_tls_verification = true
+}
+```
+
+One more example including optional cookies
+
+```terraform
+provider "guacamole" {
+  url         = "https://guacamole.example.com"
+  token       = "8675309"
+  data_source = "mysql"
+  cookies     = {
+    SERVERID = "field-guacp1-3"
+  }
+  disable_tls_verification = true
+}
+```
+
 ## Schema
 
 - **url** (String) URL of guacamole web server (defaults to environment variable `GUACAMOLE_URL`)
 - **username** (String) Username to authenticate to guacamole (defaults to environment variable `GUACAMOLE_USERNAME`)
-- **password** (String) Password to authenticate to guacamole (defaults to environment variable `GUACAMOLE_PASSWORD`)
+- **password** (String) Password to authenticate to guacamole (defaults to environment variable `GUACAMOLE_PASSWORD`). This parameter is mutually exclusive to `token`
+- **token** (String) Token to authenticate to guacamole (defaults to environment variable `GUACAMOLE_TOKEN`).  This parameter is mutually exclusive to `password`
+- **data_source** (String) Datasource for guacamole configuration data (defaults to environment variable `GUACAMOLE_DATA_SOURCE`).  This parameter is required for token based authentication.  Values must be one of:
+  - `mysql`
+  - `postgresql`
+- **cookies** (Map[string], Optional) Map of cookies to be included with requests if using `token` based authentication.  This parameter helps support cookie based load balancing use cases coupled with dual factor authentication.
 - **disable_tls_verification** (Bool, Optional) Whether to disable tls verification for ssl connections (defaults to `false`)
 - **disable_cookies** (Bool, Optional) Whether to disable cookie collection in session (defaults to `false`)
 

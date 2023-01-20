@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	guac "github.com/techBeck03/guacamole-api-client"
 )
 
@@ -19,15 +20,39 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("GUACAMOLE_URL", nil),
 			},
 			"username": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("GUACAMOLE_USERNAME", nil),
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"password"},
+				DefaultFunc:  schema.EnvDefaultFunc("GUACAMOLE_USERNAME", nil),
 			},
 			"password": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Sensitive:   true,
-				DefaultFunc: schema.EnvDefaultFunc("GUACAMOLE_PASSWORD", nil),
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"username"},
+				AtLeastOneOf: []string{"password", "token"},
+				Sensitive:    true,
+				DefaultFunc:  schema.EnvDefaultFunc("GUACAMOLE_PASSWORD", nil),
+			},
+			"token": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"password", "token"},
+				Sensitive:    true,
+				DefaultFunc:  schema.EnvDefaultFunc("GUACAMOLE_TOKEN", nil),
+			},
+			"data_source": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				RequiredWith:     []string{"token"},
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"postgresql", "mysql"}, true)),
+				DefaultFunc:      schema.EnvDefaultFunc("GUACAMOLE_DATA_SOURCE", nil),
+			},
+			"cookies": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"disable_tls_verification": {
 				Type:        schema.TypeBool,
@@ -70,8 +95,18 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	url := strings.TrimRight(d.Get("url").(string), "/")
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
+	token := d.Get("token").(string)
+	data_source := d.Get("data_source").(string)
 	disableTLS := d.Get("disable_tls_verification").(bool)
 	disableCookies := d.Get("disable_cookies").(bool)
+
+	cookies := make(map[string]string)
+	cookieMap := d.Get("cookies").(map[string]interface{})
+	if len(cookieMap) > 0 {
+		for k, v := range cookieMap {
+			cookies[k] = v.(string)
+		}
+	}
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -80,6 +115,9 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		URL:                    url,
 		Username:               username,
 		Password:               password,
+		Token:                  token,
+		DataSource:             data_source,
+		Cookies:                cookies,
 		DisableTLSVerification: disableTLS,
 		DisableCookies:         disableCookies,
 	}
@@ -120,18 +158,11 @@ func validate(config guac.Config) diag.Diagnostics {
 			Detail:   "URL must be configured for the guacamole provider",
 		})
 	}
-	if config.Username == "" {
+	if config.Password == "" && config.Token == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Missing provider parameter",
-			Detail:   "Username must be configured for the guacamole provider",
-		})
-	}
-	if config.Password == "" {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Missing provider parameter",
-			Detail:   "Password must be configured for the guacamole provider",
+			Detail:   "Either username/password or token/data_source must be configured for the guacamole provider",
 		})
 	}
 	return diags

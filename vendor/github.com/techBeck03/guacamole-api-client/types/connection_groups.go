@@ -5,6 +5,7 @@ type GuacConnectionGroup struct {
 	Name              string                        `json:"name"`
 	Identifier        string                        `json:"identifier"`
 	ParentIdentifier  string                        `json:"parentIdentifier"`
+	Path              string                        `json:"path,omitempty"`
 	Type              string                        `json:"type"`
 	ActiveConnections int                           `json:"activeConnections"`
 	ChildConnections  []GuacConnection              `json:"childConnections"`
@@ -25,4 +26,10 @@ func (GuacConnectionGroup) ValidTypes() []string {
 		"ORGANIZATIONAL",
 		"BALANCING",
 	}
+}
+
+// GuacConnectionGroupPathTree returns map of connection paths
+type GuacConnectionGroupPathTree struct {
+	Connections map[string]string
+	Groups      map[string]string
 }

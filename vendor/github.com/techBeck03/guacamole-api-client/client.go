@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -24,6 +25,9 @@ type Config struct {
 	Username               string
 	DisableTLSVerification bool
 	DisableCookies         bool
+	Token                  string
+	DataSource             string
+	Cookies                map[string]string
 }
 
 // Client - base client for guacamole interactions
@@ -54,31 +58,56 @@ func New(config Config) Client {
 
 // Connect - function for establishing connection to guacamole
 func (c *Client) Connect() error {
-	resp, err := c.client.PostForm(fmt.Sprintf("%s/%s", c.config.URL, tokenPath),
-		url.Values{
-			"username": {c.config.Username},
-			"password": {c.config.Password},
-		})
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode == 403 {
-		return fmt.Errorf("Invalid Credentials")
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	var tokenresp types.AuthenticationResponse
+	// check if token and dataSource are provided
+	if c.config.Token != "" && c.config.DataSource != "" {
+		// test supplied token and dataSource are valid
+		c.baseURL = fmt.Sprintf("%s/api/session/data/%s", c.config.URL, c.config.DataSource)
+		req, _ := c.CreateJSONRequest("GET", fmt.Sprintf("%s/schema/userAttributes", c.baseURL), nil)
 
-	err = json.Unmarshal(body, &tokenresp)
-	if err != nil {
-		return err
-	}
-	c.token = tokenresp.AuthToken
-	c.baseURL = fmt.Sprintf("%s/api/session/data/%s", c.config.URL, tokenresp.DataSource)
-	if !(c.config.DisableCookies) {
-		c.cookies = resp.Cookies()
+		c.token = c.config.Token
+		for k, v := range c.config.Cookies {
+			cookie := &http.Cookie{
+				Name:  k,
+				Value: v,
+			}
+			c.cookies = append(c.cookies, cookie)
+		}
+		var result interface{}
+		err := c.Call(req, &result)
+		if err != nil {
+			log.Printf("%s", err)
+			return err
+		}
+		if result == nil {
+			return fmt.Errorf("unable to connect using supplied token and dataSource")
+		}
+	} else {
+		resp, err := c.client.PostForm(fmt.Sprintf("%s/%s", c.config.URL, tokenPath),
+			url.Values{
+				"username": {c.config.Username},
+				"password": {c.config.Password},
+			})
+		if err != nil {
+			return err
+		}
+		if resp.StatusCode == 403 {
+			return fmt.Errorf("invalid Credentials")
+		}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		var tokenresp types.AuthenticationResponse
+
+		err = json.Unmarshal(body, &tokenresp)
+		if err != nil {
+			return err
+		}
+		c.token = tokenresp.AuthToken
+		c.baseURL = fmt.Sprintf("%s/api/session/data/%s", c.config.URL, tokenresp.DataSource)
+		if !(c.config.DisableCookies) {
+			c.cookies = resp.Cookies()
+		}
 	}
 	return nil
 }
@@ -115,11 +144,8 @@ func (c *Client) CreateJSONRequest(method string, path string, params interface{
 
 // Call - function for handling http requests
 func (c *Client) Call(request *http.Request, result interface{}) error {
-	// Add authentication token to query params
-	q := request.URL.Query()
-	q.Add("token", c.token)
-
-	request.URL.RawQuery = q.Encode()
+	// Add authentication token to request Header
+	request.Header.Set("Guacamole-Token", c.token)
 
 	// Add cookies if configured
 	if !(c.config.DisableCookies) {
@@ -141,7 +167,7 @@ func (c *Client) Call(request *http.Request, result interface{}) error {
 		body := io.TeeReader(response.Body, &rawBodyBuffer)
 		var responseBody interface{}
 		json.NewDecoder(body).Decode(&responseBody)
-		return fmt.Errorf("Request %+v\n failed with status code %d\n response %+v\n%+v", request,
+		return fmt.Errorf("request %+v\n failed with status code %d\n response %+v\n%+v", request,
 			response.StatusCode, responseBody,
 			response)
 	}

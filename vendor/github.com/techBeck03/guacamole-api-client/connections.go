@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/techBeck03/guacamole-api-client/types"
 )
@@ -67,51 +66,51 @@ func (c *Client) ReadConnection(identifier string) (types.GuacConnection, error)
 // ReadConnectionByPath gets a connection by path (Parent/Name)
 func (c *Client) ReadConnectionByPath(path string) (types.GuacConnection, error) {
 	var ret types.GuacConnection
-	var parentIdentifier string
 
-	splitPath := strings.Split(path, "/")
-	groups, err := c.ListConnectionGroups()
+	groups, err := c.GetConnectionTree("ROOT")
 
 	if err != nil {
 		return ret, err
 	}
 
-	if strings.ToUpper(splitPath[0]) == "ROOT" {
-		parentIdentifier = "ROOT"
-	} else {
-		for _, group := range groups {
-			if group.Name == splitPath[0] {
-				parentIdentifier = group.Identifier
-				break
-			}
-		}
-	}
-
-	if parentIdentifier == "" {
-		return ret, fmt.Errorf("No connection group found for parent with name: %s", splitPath[0])
-	}
-
-	connections, err := c.ListConnections()
+	var tree types.GuacConnectionGroupPathTree
+	tree.Connections = make(map[string]string)
+	tree.Groups = make(map[string]string)
+	err = c.getPathTree(groups, &tree)
 
 	if err != nil {
 		return ret, err
 	}
 
-	for _, connection := range connections {
-		if (connection.ParentIdentifier == parentIdentifier) && (connection.Name == splitPath[1]) {
-			ret, err = c.ReadConnection(connection.Identifier)
+	for i, p := range tree.Connections {
+		if p == path {
+			conn, err := c.ReadConnection(i)
+			conn.Path = path
 			if err != nil {
 				return ret, err
 			}
-			break
+			return conn, nil
 		}
 	}
 
-	if ret.Identifier == "" {
-		return ret, fmt.Errorf("No connection group found with parentIdentifier = %s\tname = %s", parentIdentifier, splitPath[1])
+	return ret, fmt.Errorf("no connection found with path: %s", path)
+}
+
+// GetConnectionPathById gets a connection group path by identifier
+func (c *Client) GetConnectionPathById(identifier string) (string, error) {
+	groups, err := c.GetConnectionTree("ROOT")
+	if err != nil {
+		return "", err
 	}
 
-	return ret, nil
+	var tree types.GuacConnectionGroupPathTree
+	tree.Connections = make(map[string]string)
+	tree.Groups = make(map[string]string)
+	err = c.getPathTree(groups, &tree)
+	if err != nil {
+		return "", err
+	}
+	return tree.Connections[identifier], nil
 }
 
 // UpdateConnection updates a connection by identifier

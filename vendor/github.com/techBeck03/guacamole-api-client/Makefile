@@ -14,3 +14,6 @@ lint:
 
 test: lint
 	go test -count=1 -v -cover --race -tags="unittests" ./
+
+test_specific: lint
+	go test -count=1 -v -cover --race -tags="specific" ./

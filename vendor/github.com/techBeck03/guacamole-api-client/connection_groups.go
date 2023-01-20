@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/techBeck03/guacamole-api-client/types"
 )
@@ -30,31 +29,30 @@ func (c *Client) GetConnectionTree(identifier string) (types.GuacConnectionGroup
 	return ret, nil
 }
 
-// flatten Flattens the
-func flatten(nested []types.GuacConnectionGroup) ([]types.GuacConnection, []types.GuacConnectionGroup, error) {
-	flatConns := []types.GuacConnection{}
-	flatGrps := []types.GuacConnectionGroup{}
-	for _, groups := range nested {
-		flatGrps = append(flatGrps, groups)
-		if len(groups.ChildGroups) > 0 {
-			conns, subgrps, err := flatten(groups.ChildGroups)
-			if err != nil {
-				return nil, nil, err
-			}
-			for _, c := range conns {
-				flatConns = append(flatConns, c)
-			}
-			for _, g := range subgrps {
-				flatGrps = append(flatGrps, g)
-			}
+// getPathTree generates a map of all connection paths
+func (c *Client) getPathTree(nested types.GuacConnectionGroup, results *types.GuacConnectionGroupPathTree) error {
+	for _, group := range nested.ChildGroups {
+		if nested.Path != "" {
+			group.Path = fmt.Sprintf("%s/%s", nested.Path, group.Name)
+		} else {
+			group.Path = group.Name
 		}
-		if len(groups.ChildConnections) > 0 {
-			for _, c := range groups.ChildConnections {
-				flatConns = append(flatConns, c)
-			}
+		results.Groups[group.Identifier] = group.Path
+		err := c.getPathTree(group, results)
+		if err != nil {
+			return err
 		}
 	}
-	return flatConns, flatGrps, nil
+
+	for _, connection := range nested.ChildConnections {
+		if nested.Name == "ROOT" {
+			results.Connections[connection.Identifier] = connection.Name
+		} else {
+			results.Connections[connection.Identifier] = fmt.Sprintf("%s/%s", nested.Path, connection.Name)
+		}
+	}
+
+	return nil
 }
 
 // CreateConnectionGroup creates a guacamole connection group
@@ -108,46 +106,51 @@ func (c *Client) ReadConnectionGroup(identifier string) (types.GuacConnectionGro
 // ReadConnectionGroupByPath gets a connection group by path (Parent/Name)
 func (c *Client) ReadConnectionGroupByPath(path string) (types.GuacConnectionGroup, error) {
 	var ret types.GuacConnectionGroup
-	var parentIdentifier string
 
-	splitPath := strings.Split(path, "/")
-	groups, err := c.ListConnectionGroups()
+	groups, err := c.GetConnectionTree("ROOT")
 
 	if err != nil {
 		return ret, err
 	}
 
-	if strings.ToUpper(splitPath[0]) == "ROOT" {
-		parentIdentifier = "ROOT"
-	} else {
-		for group := range groups {
-			if groups[group].Name == splitPath[0] {
-				parentIdentifier = groups[group].Identifier
-				break
-			}
-		}
+	var tree types.GuacConnectionGroupPathTree
+	tree.Connections = make(map[string]string)
+	tree.Groups = make(map[string]string)
+	err = c.getPathTree(groups, &tree)
+
+	if err != nil {
+		return ret, err
 	}
 
-	if parentIdentifier == "" {
-		return ret, fmt.Errorf("No connection group found for parent with name: %s", splitPath[0])
-	}
-
-	for _, group := range groups {
-		if (group.ParentIdentifier == parentIdentifier) && (group.Name == splitPath[1]) {
-			readGroup, err := c.ReadConnectionGroup(group.Identifier)
+	for i, p := range tree.Groups {
+		if p == path {
+			grp, err := c.ReadConnectionGroup(i)
+			grp.Path = path
 			if err != nil {
 				return ret, err
 			}
-			ret = readGroup
-			break
+			return grp, nil
 		}
 	}
 
-	if ret.Identifier == "" {
-		return ret, fmt.Errorf("No connection group found with parentIdentifier = %s\tname = %s", parentIdentifier, splitPath[1])
+	return ret, fmt.Errorf("no connection group found with path: %s", path)
+}
+
+// GetConnectionGroupPathById gets a connection group path by identifier
+func (c *Client) GetConnectionGroupPathById(identifier string) (string, error) {
+	groups, err := c.GetConnectionTree("ROOT")
+	if err != nil {
+		return "", err
 	}
 
-	return ret, nil
+	var tree types.GuacConnectionGroupPathTree
+	tree.Connections = make(map[string]string)
+	tree.Groups = make(map[string]string)
+	err = c.getPathTree(groups, &tree)
+	if err != nil {
+		return "", err
+	}
+	return tree.Groups[identifier], nil
 }
 
 // UpdateConnectionGroup updates a connection group by identifier

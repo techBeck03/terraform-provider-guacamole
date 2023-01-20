@@ -5,6 +5,7 @@ type GuacConnection struct {
 	Name              string                   `json:"name"`
 	Identifier        string                   `json:"identifier,omitempty"`
 	ParentIdentifier  string                   `json:"parentIdentifier"`
+	Path              string                   `json:"path,omitempty"`
 	Protocol          string                   `json:"protocol"`
 	Attributes        GuacConnectionAttributes `json:"attributes"`
 	Parameters        GuacConnectionParameters `json:"parameters"`

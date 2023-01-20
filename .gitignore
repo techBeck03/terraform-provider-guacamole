@@ -40,6 +40,7 @@ terraform
 
 # Ignore test env file
 .env
+tests/
 
 # Ignore build
 dist/
