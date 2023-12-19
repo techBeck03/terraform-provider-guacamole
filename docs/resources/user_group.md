@@ -15,6 +15,8 @@ The user group data source allows you to configure a guacamole user group
 resource "guacamole_user_group" "group" {
   identifier = "testGuacamoleUserGroup"
   system_permissions = ["ADMINISTER", "CREATE_USER"]
+  member_groups = ["Child Group"]
+  member_users = ["testGuacamoleUser"]
   group_membership = ["Parent Group"]
   connections = [
     "12345"
@@ -37,7 +39,8 @@ resource "guacamole_user_group" "group" {
 - `group_membership` - (List) list of user group identifiers that this group is a member of
 - `system_permissions` - (List) list of system permissions assigned to the user
 - `member_groups` - (List) user group identifiers that are members of this group
-- `connections` - list of connection identifiers assigned to the user group.  This list currently does not include connection identifiers from parent user groups.
+- `member_users` - (List) usernames that are members of this group
+- `connections` - (List) list of connection identifiers assigned to the user group.  This list currently does not include connection identifiers from parent user groups.
 - `connection_groups` - (List) list of connection group identifiers assigned to the user group.  This list currently does not include connection group identifiers from parent user groups.
 
 ### Attributes
