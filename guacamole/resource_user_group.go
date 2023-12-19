@@ -72,6 +72,22 @@ func guacamoleUserGroup() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+            "member_groups": {
+                Type:        schema.TypeSet,
+                Description: "User Group identifiers which are part of this group",
+                Optional:    true,
+                Elem: &schema.Schema{
+                    Type: schema.TypeString,
+                },
+            },
+            "member_users": {
+                Type:        schema.TypeSet,
+                Description: "Usernames which are part of this group",
+                Optional:    true,
+                Elem: &schema.Schema{
+                    Type: schema.TypeString,
+                },
+            },
 		},
                 Importer: &schema.ResourceImporter{
                         StateContext: schema.ImportStatePassthroughContext,
@@ -118,6 +134,49 @@ func resourceUserGroupCreate(ctx context.Context, d *schema.ResourceData, m inte
 			goto Cleanup
 		}
 	}
+
+    if !diags.HasError() {
+        memberGroupSet, ok := d.GetOk("member_groups")
+        var memberGroups []string
+        for _, memberGroup := range memberGroupSet.(*schema.Set).List() {
+            memberGroups = append(memberGroups, memberGroup.(string))
+        }
+        if ok && len(memberGroups) > 0 {
+            check := validateGroups(client, memberGroups)
+            if check.HasError() {
+                diags = append(diags, check...)
+                goto Cleanup
+            }
+            var permissionItems []types.GuacPermissionItem
+            for _, group := range memberGroups {
+                permissionItems = append(permissionItems, client.NewAddGroupMemberPermission(group))
+            }
+            err = client.SetUserGroupMemberGroups(group.Identifier, &permissionItems)
+            if err != nil {
+                diags = append(diags, diag.FromErr(err)...)
+                goto Cleanup
+            }
+        }
+    }
+
+    if !diags.HasError() {
+        memberUserSet, ok := d.GetOk("member_users")
+        var memberUsers []string
+        for _, memberUser := range memberUserSet.(*schema.Set).List() {
+            memberUsers = append(memberUsers, memberUser.(string))
+        }
+        if ok && len(memberUsers) > 0 {
+            var permissionItems []types.GuacPermissionItem
+            for _, user := range memberUsers {
+                permissionItems = append(permissionItems, client.NewAddGroupMemberPermission(user))
+            }
+            err = client.SetUserGroupUsers(group.Identifier, &permissionItems)
+            if err != nil {
+                diags = append(diags, diag.FromErr(err)...)
+                goto Cleanup
+            }
+        }
+    }
 
 	if !diags.HasError() {
 		systemPermissionsSet, ok := d.GetOk("system_permissions")
